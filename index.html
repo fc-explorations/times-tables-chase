@@ -897,8 +897,11 @@
         y,
         vx: 0,
         vy: 0,
+        targetVx: 0,
+        targetVy: 0,
         carriedNumber,
         speed: BASE_CHARACTER_SPEED * game.settings.speedMultiplier * (type === "player" ? game.settings.playerNpcSpeedRatio : 1),
+        acceleration: type === "player" ? 12 : 4.5,
         radius: type === "player" ? 0.32 : 0.3,
         interactionRadius: type === "player" ? 0.82 : 0.78,
         swapCooldown: 0,
@@ -1004,8 +1007,8 @@
       if (keys.has("arrowdown") || keys.has("s")) sy += 1;
 
       const world = normalize(sx + sy, sy - sx);
-      game.player.vx = world.x * game.player.speed;
-      game.player.vy = world.y * game.player.speed;
+      game.player.targetVx = world.x * game.player.speed;
+      game.player.targetVy = world.y * game.player.speed;
       moveCharacter(game.player, dt);
     }
 
@@ -1039,33 +1042,38 @@
           ? fallbackDirection(npc.phase + npc.spriteIndex + 1)
           : normalize(dx, dy);
         const sign = mode === "attract" ? 1 : -1;
-        npc.vx = dir.x * npc.speed * sign;
-        npc.vy = dir.y * npc.speed * sign;
+        npc.targetVx = dir.x * npc.speed * sign;
+        npc.targetVy = dir.y * npc.speed * sign;
       } else {
         npc.wanderTimer -= dt;
         if (npc.wanderTimer <= 0) {
           npc.wanderTimer = randomRange(0.8, 2.4);
-          npc.wanderAngle += randomRange(-1.8, 1.8);
+          npc.wanderAngle += randomRange(-0.9, 0.9);
         }
-        npc.vx = Math.cos(npc.wanderAngle) * npc.speed * 0.72;
-        npc.vy = Math.sin(npc.wanderAngle) * npc.speed * 0.72;
+        npc.targetVx = Math.cos(npc.wanderAngle) * npc.speed * 0.72;
+        npc.targetVy = Math.sin(npc.wanderAngle) * npc.speed * 0.72;
       }
 
       moveCharacter(npc, dt);
     }
 
     function moveCharacter(character, dt) {
+      const blend = 1 - Math.exp(-character.acceleration * dt);
+      character.vx += (character.targetVx - character.vx) * blend;
+      character.vy += (character.targetVy - character.vy) * blend;
       character.x += character.vx * dt;
       character.y += character.vy * dt;
 
       if (character.x < 0.45 || character.x > ROOM.width - 0.45) {
         character.x = clamp(character.x, 0.45, ROOM.width - 0.45);
         character.vx *= -0.4;
+        character.targetVx *= -0.4;
         character.wanderAngle = Math.PI - character.wanderAngle;
       }
       if (character.y < 0.45 || character.y > ROOM.height - 0.45) {
         character.y = clamp(character.y, 0.45, ROOM.height - 0.45);
         character.vy *= -0.4;
+        character.targetVy *= -0.4;
         character.wanderAngle = -character.wanderAngle;
       }
     }
@@ -1097,6 +1105,10 @@
             a.y = clamp(a.y - ny * overlap, 0.45, ROOM.height - 0.45);
             b.x = clamp(b.x + nx * overlap, 0.45, ROOM.width - 0.45);
             b.y = clamp(b.y + ny * overlap, 0.45, ROOM.height - 0.45);
+            a.vx *= 0.85;
+            a.vy *= 0.85;
+            b.vx *= 0.85;
+            b.vy *= 0.85;
           }
         }
       }

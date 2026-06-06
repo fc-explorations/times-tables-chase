@@ -260,6 +260,7 @@ Default NPC behavior:
 - Occasionally choose a new random direction.
 - Avoid leaving the room bounds.
 - Move slower than or similar to the player.
+- Use inertia so movement eases toward target velocity instead of snapping instantly.
 
 Each NPC has an awareness radius derived from the configured awareness amount. When another character enters this radius, the NPC stops pure random wandering and reacts to that character.
 
@@ -403,6 +404,7 @@ Recommended controls:
 
 - Arrow keys or WASD to move.
 - Movement should be continuous rather than tile-by-tile.
+- Movement should include light inertia, so stopping and direction changes feel smooth rather than jittery.
 
 Because the view is isometric, controls should remain intuitive:
 
