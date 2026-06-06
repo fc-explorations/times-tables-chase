@@ -70,7 +70,8 @@ Required settings:
 4. Room size in number of tiles per side.
 5. Speed multiplier.
 6. Player-vs-NPC speed ratio.
-7. Toggle for showing or hiding NPC awareness radius overlays.
+7. Minimum and maximum square state duration in seconds.
+8. Toggle for showing or hiding NPC awareness radius overlays.
 
 The settings screen should include:
 
@@ -88,6 +89,8 @@ const settings = {
   roomSize: 10,
   speedMultiplier: 1,
   playerNpcSpeedRatio: 1,
+  squareStateMinSeconds: 5,
+  squareStateMaxSeconds: 12,
   showAwareness: true
 };
 ```
@@ -103,6 +106,8 @@ const settings = {
 - Less than `1`: the player moves slower than NPCs, so a chasing NPC can catch the player.
 
 Lower player-vs-NPC speed ratios should increase score rewards because the room is harder.
+
+`settings.squareStateMinSeconds` and `settings.squareStateMaxSeconds` control how long each NPC remains in one square-wave state before switching between attraction and repulsion. Both endpoints should be configurable from `5` to `30` seconds. Each NPC should pick a state duration from this range when a level is generated, and the full square-wave cycle should be twice that duration.
 
 The settings define the start of a run only. As the player solves rooms and advances to later levels, the game should automatically increase difficulty from those starting values.
 
@@ -326,6 +331,7 @@ Each NPC is characterized by:
 
 - `phase`: starting offset of the wave.
 - `wavelength`: duration of a full attraction/repulsion cycle.
+- `stateDuration`: duration of each attraction or repulsion state.
 
 Use game time to evaluate the square wave.
 
@@ -333,6 +339,7 @@ Recommended interpretation:
 
 - First half of the cycle: attraction.
 - Second half of the cycle: repulsion.
+- The cycle wavelength is `stateDuration * 2`.
 
 Pseudo-code:
 
@@ -566,10 +573,12 @@ const game = {
   settings: {
     npcCount: 5,
     allowedBValues: [2, 3, 4, 5],
-    awarenessAmount: 0.5,
-    roomSize: 10,
-    speedMultiplier: 1,
-    playerNpcSpeedRatio: 1
+  awarenessAmount: 0.5,
+  roomSize: 10,
+  speedMultiplier: 1,
+  playerNpcSpeedRatio: 1,
+  squareStateMinSeconds: 5,
+  squareStateMaxSeconds: 12
   },
   equation: {
     a: 3,
@@ -666,7 +675,7 @@ Recommended implementation order:
 1. Create canvas and resize handling.
 2. Add basic screen state for splash, settings, and game.
 3. Build splash screen buttons and leaderboard display.
-4. Build settings controls for starting NPC count, allowed `B` values, starting awareness amount, room size, speed multiplier, player-vs-NPC speed ratio, and awareness overlay visibility.
+4. Build settings controls for starting NPC count, allowed `B` values, starting awareness amount, room size, speed multiplier, player-vs-NPC speed ratio, square state duration range, and awareness overlay visibility.
 5. Implement world-to-isometric projection.
 6. Draw the isometric room.
 7. Add player movement.

@@ -263,6 +263,22 @@
       accent-color: #2f80ed;
     }
 
+    .range-pair {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .range-pair-row {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 10px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
     #gameScreen {
       display: none;
       background: #dff1ee;
@@ -424,6 +440,21 @@
         </div>
 
         <div class="setting-card full">
+          <label>Square state duration <span id="squareStateDurationValue"></span></label>
+          <p class="hint">Seconds each NPC stays in attract or repel mode before switching. Range: 5 to 30 seconds.</p>
+          <div class="range-pair">
+            <label class="range-pair-row" for="squareStateMinInput">
+              <span>Min</span>
+              <input id="squareStateMinInput" type="range" min="5" max="30" step="1">
+            </label>
+            <label class="range-pair-row" for="squareStateMaxInput">
+              <span>Max</span>
+              <input id="squareStateMaxInput" type="range" min="5" max="30" step="1">
+            </label>
+          </div>
+        </div>
+
+        <div class="setting-card full">
           <label>Allowed values for B</label>
           <p class="hint">Choose the multiplication tables used to generate rooms.</p>
           <div id="bValueChecks" class="check-grid"></div>
@@ -467,6 +498,8 @@
       roomSize: 10,
       speedMultiplier: 1,
       playerNpcSpeedRatio: 1,
+      squareStateMinSeconds: 5,
+      squareStateMaxSeconds: 12,
       showAwareness: true
     };
 
@@ -512,6 +545,9 @@
     const speedValue = document.getElementById("speedValue");
     const playerNpcSpeedRatioInput = document.getElementById("playerNpcSpeedRatioInput");
     const playerNpcSpeedRatioValue = document.getElementById("playerNpcSpeedRatioValue");
+    const squareStateMinInput = document.getElementById("squareStateMinInput");
+    const squareStateMaxInput = document.getElementById("squareStateMaxInput");
+    const squareStateDurationValue = document.getElementById("squareStateDurationValue");
     const showAwarenessInput = document.getElementById("showAwarenessInput");
     const bValueChecks = document.getElementById("bValueChecks");
     const leaderboardContent = document.getElementById("leaderboardContent");
@@ -582,6 +618,20 @@
       return { x: Math.cos(angle), y: Math.sin(angle) };
     }
 
+    function normalizeSquareStateRange(minValue, maxValue) {
+      const a = clamp(Math.round(Number(minValue) || DEFAULT_SETTINGS.squareStateMinSeconds), 5, 30);
+      const b = clamp(Math.round(Number(maxValue) || DEFAULT_SETTINGS.squareStateMaxSeconds), 5, 30);
+      return {
+        min: Math.min(a, b),
+        max: Math.max(a, b)
+      };
+    }
+
+    function updateSquareStateDurationLabel() {
+      const range = normalizeSquareStateRange(squareStateMinInput.value, squareStateMaxInput.value);
+      squareStateDurationValue.textContent = `${range.min}-${range.max}s`;
+    }
+
     function todayString() {
       return new Date().toISOString().slice(0, 10);
     }
@@ -593,6 +643,7 @@
         const allowedBValues = stored.allowedBValues
           .map(Number)
           .filter((value) => Number.isInteger(value) && value >= 2 && value <= 12);
+        const squareStateRange = normalizeSquareStateRange(stored.squareStateMinSeconds, stored.squareStateMaxSeconds);
         return {
           npcCount: clamp(Number(stored.npcCount) || DEFAULT_SETTINGS.npcCount, 1, 14),
           allowedBValues: allowedBValues.length ? allowedBValues : [...DEFAULT_SETTINGS.allowedBValues],
@@ -600,6 +651,8 @@
           roomSize: clamp(Math.floor(Number(stored.roomSize) || DEFAULT_SETTINGS.roomSize), 6, 18),
           speedMultiplier: clamp(Number(stored.speedMultiplier) || DEFAULT_SETTINGS.speedMultiplier, 0.75, 1.75),
           playerNpcSpeedRatio: clamp(Number(stored.playerNpcSpeedRatio) || DEFAULT_SETTINGS.playerNpcSpeedRatio, 0.5, 1.5),
+          squareStateMinSeconds: squareStateRange.min,
+          squareStateMaxSeconds: squareStateRange.max,
           showAwareness: typeof stored.showAwareness === "boolean" ? stored.showAwareness : DEFAULT_SETTINGS.showAwareness
         };
       } catch {
@@ -705,6 +758,9 @@
       speedValue.textContent = `${Number(game.settings.speedMultiplier).toFixed(2)}x`;
       playerNpcSpeedRatioInput.value = game.settings.playerNpcSpeedRatio;
       playerNpcSpeedRatioValue.textContent = `${Number(game.settings.playerNpcSpeedRatio).toFixed(2)}x`;
+      squareStateMinInput.value = game.settings.squareStateMinSeconds;
+      squareStateMaxInput.value = game.settings.squareStateMaxSeconds;
+      updateSquareStateDurationLabel();
       showAwarenessInput.checked = game.settings.showAwareness;
       for (const input of bValueChecks.querySelectorAll("input")) {
         input.checked = game.settings.allowedBValues.includes(Number(input.value));
@@ -713,6 +769,7 @@
 
     function readSettingsForm() {
       const selected = Array.from(bValueChecks.querySelectorAll("input:checked")).map((input) => Number(input.value));
+      const squareStateRange = normalizeSquareStateRange(squareStateMinInput.value, squareStateMaxInput.value);
       game.settings = {
         npcCount: clamp(Math.floor(Number(npcCountInput.value) || DEFAULT_SETTINGS.npcCount), 1, 14),
         roomSize: clamp(Math.floor(Number(roomSizeInput.value) || DEFAULT_SETTINGS.roomSize), 6, 18),
@@ -720,6 +777,8 @@
         awarenessAmount: clamp(Number(awarenessInput.value), 0, 1),
         speedMultiplier: clamp(Number(speedInput.value) || DEFAULT_SETTINGS.speedMultiplier, 0.75, 1.75),
         playerNpcSpeedRatio: clamp(Number(playerNpcSpeedRatioInput.value) || DEFAULT_SETTINGS.playerNpcSpeedRatio, 0.5, 1.5),
+        squareStateMinSeconds: squareStateRange.min,
+        squareStateMaxSeconds: squareStateRange.max,
         showAwareness: showAwarenessInput.checked
       };
       applyRoomSize();
@@ -827,6 +886,10 @@
     }
 
     function createCharacter(type, x, y, carriedNumber, index = 0) {
+      const stateDuration = type === "npc"
+        ? randomRange(game.settings.squareStateMinSeconds, game.settings.squareStateMaxSeconds)
+        : 0;
+      const wavelength = Math.max(10, stateDuration * 2);
       return {
         id: game.nextCharacterId++,
         type,
@@ -840,8 +903,9 @@
         interactionRadius: type === "player" ? 0.82 : 0.78,
         swapCooldown: 0,
         awarenessRadius: 0,
-        phase: randomRange(0, 5),
-        wavelength: randomRange(3.2, 6.2),
+        phase: type === "npc" ? randomRange(0, wavelength) : 0,
+        stateDuration,
+        wavelength,
         wanderTimer: 0,
         wanderAngle: randomRange(0, Math.PI * 2),
         spriteIndex: index
@@ -1398,6 +1462,10 @@
       playerNpcSpeedRatioValue.textContent = `${Number(playerNpcSpeedRatioInput.value).toFixed(2)}x`;
     });
     playerNpcSpeedRatioInput.addEventListener("change", readSettingsForm);
+    squareStateMinInput.addEventListener("input", updateSquareStateDurationLabel);
+    squareStateMaxInput.addEventListener("input", updateSquareStateDurationLabel);
+    squareStateMinInput.addEventListener("change", readSettingsForm);
+    squareStateMaxInput.addEventListener("change", readSettingsForm);
     showAwarenessInput.addEventListener("change", readSettingsForm);
     bValueChecks.addEventListener("change", readSettingsForm);
 
