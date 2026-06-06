@@ -1067,14 +1067,9 @@
     }
 
     function forceNpcRepelState(npc) {
-      const repelStart = npc.wavelength / 2 + 0.02;
-      npc.phase = (repelStart - game.timeSeconds + npc.wavelength) % npc.wavelength;
-    }
-
-    function areNpcsMutuallyAttracted(a, b, characters) {
-      if (a.type !== "npc" || b.type !== "npc") return false;
-      if (getNpcMode(a) !== "attract" || getNpcMode(b) !== "attract") return false;
-      return findAwarenessTarget(a, characters) === b && findAwarenessTarget(b, characters) === a;
+      if (npc.type !== "npc") return;
+      const repelTime = randomRange(npc.wavelength / 2 + 0.02, npc.wavelength - 0.02);
+      npc.phase = (repelTime - game.timeSeconds + npc.wavelength) % npc.wavelength;
     }
 
     function updateNpcWaypoint(npc, dt) {
@@ -1214,14 +1209,11 @@
           }
 
           if (d <= interactionDistance && !game.activeContacts.has(contactKey) && a.swapCooldown <= 0 && b.swapCooldown <= 0) {
-            const shouldForceRepel = areNpcsMutuallyAttracted(a, b, characters);
             const temp = a.carriedNumber;
             a.carriedNumber = b.carriedNumber;
             b.carriedNumber = temp;
-            if (shouldForceRepel) {
-              forceNpcRepelState(a);
-              forceNpcRepelState(b);
-            }
+            forceNpcRepelState(a);
+            forceNpcRepelState(b);
             a.swapCooldown = 0.75;
             b.swapCooldown = 0.75;
             game.activeContacts.add(contactKey);

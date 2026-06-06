@@ -271,7 +271,7 @@ The reaction is either:
 - Attraction: move toward the detected character.
 - Repulsion: move away from the detected character.
 
-When two NPCs are mutually attracted to each other and interact, they should exchange numbers and then both immediately restart in repulsion mode. They should keep their own wavelengths, but their phases should reset so each NPC begins the repulsion half of its square wave.
+After any number exchange, every NPC involved in the exchange should immediately enter a repulsive state. Each affected NPC should keep its own wavelength, but its phase should be randomized within the repulsion half of that wavelength.
 
 This creates moving number targets that the player must chase, avoid, predict, or manipulate.
 
@@ -433,16 +433,16 @@ npc.velocity = randomWanderVelocity;
 
 NPCs should still respect room bounds.
 
-When two NPCs swap because they were mutually attracted to each other, force both NPCs into repulsion mode:
+When an NPC swaps numbers with any character, force that NPC into a random point within its repulsion state:
 
 ```js
 function forceNpcRepelState(npc, timeSeconds) {
-  const repelStart = npc.wavelength / 2;
-  npc.phase = (repelStart - timeSeconds + npc.wavelength) % npc.wavelength;
+  const repelTime = randomRange(npc.wavelength / 2, npc.wavelength);
+  npc.phase = (repelTime - timeSeconds + npc.wavelength) % npc.wavelength;
 }
 ```
 
-This avoids stable attraction clumps without adding a constant repulsive force between all NPCs.
+This avoids stable attraction clumps without adding a constant repulsive force between all NPCs, and it also gives player-NPC exchanges a brief tactical aftermath.
 
 ## Player Controls
 
