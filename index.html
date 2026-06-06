@@ -428,14 +428,22 @@
 
     .hud {
       position: absolute;
-      top: 6.8%;
-      left: 32.2%;
-      width: 35%;
-      height: 23.6%;
+      top: 6.55%;
+      left: 31.95%;
+      width: 35.5%;
+      height: 24.2%;
       display: grid;
-      grid-template-rows: auto 1fr;
-      gap: 0.65em;
-      padding: 0.75em 0.9em;
+      grid-template-rows: auto 1fr auto;
+      gap: 0.45em;
+      padding: 0.62em 0.76em 0.58em;
+      border: 1px solid rgba(66, 153, 148, 0.16);
+      border-radius: 1.35em;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(255, 252, 224, 0.32), transparent 62%),
+        linear-gradient(180deg, rgba(255, 252, 232, 0.24), rgba(255, 250, 223, 0.12));
+      box-shadow:
+        inset 0 0 1.4em rgba(255, 255, 255, 0.36),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.16);
       pointer-events: none;
     }
 
@@ -443,22 +451,22 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       align-items: start;
-      gap: 12px;
+      gap: 0.8em;
       width: 100%;
-      pointer-events: auto;
     }
 
     .hud-badge {
       width: fit-content;
-      min-height: 2em;
-      border: 2px solid rgba(31, 99, 109, 0.18);
-      border-radius: 8px;
-      padding: 0.35em 0.7em;
-      background: rgba(255, 246, 199, 0.9);
-      box-shadow: 0 4px 0 rgba(31, 99, 109, 0.12);
-      color: #16636d;
-      font-size: 1em;
+      min-height: 1.55em;
+      border: 1px solid rgba(31, 99, 109, 0.12);
+      border-radius: 999px;
+      padding: 0.18em 0.62em 0.22em;
+      background: rgba(255, 248, 211, 0.52);
+      color: #24555d;
+      font-size: 0.82em;
       font-weight: 900;
+      line-height: 1.1;
+      box-shadow: none;
     }
 
     .hud-badge.score {
@@ -468,24 +476,25 @@
     .hud-board-card {
       align-self: center;
       justify-self: center;
-      width: min(88%, 25em);
-      border: 2px solid rgba(29, 104, 111, 0.2);
-      border-radius: 8px;
-      padding: 0.75em 1.2em;
+      width: min(82%, 23.5em);
+      border: 1px solid rgba(29, 104, 111, 0.18);
+      border-radius: 0.95em;
+      padding: 1.02em 1.35em 1.08em;
       background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 255, 252, 0.78)),
-        rgba(251, 252, 247, 0.84);
+        radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.96), transparent 58%),
+        linear-gradient(180deg, rgba(255, 254, 239, 0.98), rgba(247, 251, 238, 0.92));
       box-shadow:
-        inset 0 0 0 2px rgba(255, 255, 255, 0.48),
-        0 10px 26px rgba(36, 49, 58, 0.1);
+        inset 0 0 0 1px rgba(255, 255, 255, 0.72),
+        0 0.42em 1.05em rgba(36, 49, 58, 0.12),
+        0 0.15em 0 rgba(31, 99, 109, 0.08);
       text-align: center;
       pointer-events: auto;
     }
 
     .hud-equation {
       color: #16636d;
-      font-size: 2.35em;
-      font-size: clamp(1.85em, 4.8cqw, 2.75em);
+      font-size: 3em;
+      font-size: clamp(2.15em, 5.8cqw, 3.35em);
       line-height: 1;
       font-weight: 1000;
       letter-spacing: 0;
@@ -495,33 +504,36 @@
     .missing-slot {
       display: inline-grid;
       place-items: center;
-      min-width: 1.18em;
-      height: 1.18em;
-      margin: 0 0.05em;
-      border: 3px solid rgba(22, 99, 109, 0.28);
+      min-width: 1.08em;
+      height: 1.08em;
+      margin: 0 0 0 0.08em;
+      border: 0.08em solid rgba(22, 99, 109, 0.28);
       border-radius: 999px;
       background:
         radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.95), rgba(255, 209, 102, 0.96) 62%, rgba(239, 177, 52, 0.96));
       color: #135f6a;
-      box-shadow: 0 5px 0 rgba(157, 116, 22, 0.22);
+      box-shadow:
+        inset 0 0.04em 0 rgba(255, 255, 255, 0.62),
+        0 0.09em 0 rgba(157, 116, 22, 0.22);
+      vertical-align: -0.04em;
     }
 
     .hud-menu-button {
       position: absolute;
-      right: 0.9em;
-      bottom: 0.75em;
+      right: 0.76em;
+      bottom: 0.58em;
       display: grid;
       place-items: center;
-      width: 2.15em;
-      height: 2.15em;
+      width: 1.9em;
+      height: 1.9em;
       min-height: 0;
-      border: 1px solid rgba(31, 99, 109, 0.18);
+      border: 1px solid rgba(31, 99, 109, 0.16);
       border-radius: 999px;
       padding: 0;
       color: #31535c;
-      background: rgba(233, 245, 242, 0.82);
-      box-shadow: 0 2px 0 rgba(31, 99, 109, 0.14);
-      font-size: 1.05em;
+      background: rgba(239, 247, 244, 0.78);
+      box-shadow: 0 0.12em 0 rgba(31, 99, 109, 0.1);
+      font-size: 0.96em;
       line-height: 1;
       pointer-events: auto;
     }
@@ -529,6 +541,92 @@
     .hud-menu-button .gear-icon {
       display: block;
       transform: translateY(-0.02em);
+    }
+
+    .hud-characters-button {
+      position: absolute;
+      left: 0.76em;
+      bottom: 0.58em;
+      min-height: 1.9em;
+      border: 1px solid rgba(31, 99, 109, 0.16);
+      border-radius: 999px;
+      padding: 0 0.72em;
+      color: #31535c;
+      background: rgba(239, 247, 244, 0.78);
+      box-shadow: 0 0.12em 0 rgba(31, 99, 109, 0.1);
+      font-size: 0.76em;
+      font-weight: 900;
+      line-height: 1;
+      pointer-events: auto;
+    }
+
+    .shop-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .shop-score {
+      border: 1px solid #b7d2cb;
+      border-radius: 8px;
+      padding: 8px 12px;
+      background: #fbfffd;
+      color: #31535c;
+      font-weight: 900;
+    }
+
+    .character-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    .character-card {
+      display: grid;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .character-card.selected {
+      border-color: #2f80ed;
+      box-shadow: 0 0 0 2px rgba(47, 128, 237, 0.18);
+    }
+
+    .character-preview {
+      display: grid;
+      place-items: end center;
+      min-height: 160px;
+      background: transparent;
+    }
+
+    .character-preview img {
+      max-width: 100%;
+      max-height: 160px;
+      object-fit: contain;
+    }
+
+    .character-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      color: #31535c;
+      font-weight: 900;
+    }
+
+    .character-cost {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .character-card button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
     }
 
     .toast {
@@ -560,6 +658,10 @@
       .setting-card.wide {
         grid-column: 1 / -1;
       }
+
+      .character-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 720px) {
@@ -570,6 +672,10 @@
 
       .check-grid {
         grid-template-columns: repeat(4, minmax(48px, 1fr));
+      }
+
+      .character-grid {
+        grid-template-columns: 1fr;
       }
 
       .hud {
@@ -696,7 +802,26 @@
 
       <div class="button-row">
         <button id="settingsStartButton" type="button">Start</button>
+        <button id="settingsResetButton" class="secondary" type="button">Reset</button>
         <button id="settingsBackButton" class="secondary" type="button">Back</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="characterScreen" class="screen menu-screen">
+    <div class="menu-panel">
+      <div class="shop-top">
+        <div class="settings-heading">
+          <strong>Characters</strong>
+          <span>Spend score points to unlock a player sprite for this and future runs.</span>
+        </div>
+        <div id="characterShopScore" class="shop-score">Score 0</div>
+      </div>
+
+      <div id="characterShopGrid" class="character-grid"></div>
+
+      <div class="button-row">
+        <button id="charactersBackButton" class="secondary" type="button">Back to game</button>
       </div>
     </div>
   </section>
@@ -712,6 +837,7 @@
         <div class="hud-board-card" aria-live="polite">
           <div id="equationHud" class="hud-equation">2 &times; 3 = <span class="missing-slot">?</span></div>
         </div>
+        <button id="charactersButton" class="hud-characters-button" type="button" aria-label="Open characters">Characters</button>
         <button id="quitButton" class="hud-menu-button" type="button" aria-label="Open menu">
           <span class="gear-icon" aria-hidden="true">&#9881;</span>
         </button>
@@ -725,7 +851,8 @@
 
     const STORAGE_KEYS = {
       settings: "timesTableChase.settings",
-      leaderboard: "timesTableChase.leaderboard"
+      leaderboard: "timesTableChase.leaderboard",
+      characters: "timesTableChase.characters"
     };
 
     const DEFAULT_SETTINGS = {
@@ -771,9 +898,25 @@
       }
     };
 
+    const CHARACTER_OPTIONS = [
+      { id: "default", name: "Classic", cost: 0, src: SPRITE_PATHS.player },
+      { id: "scout", name: "Scout", cost: 500, src: "assets/characters/player_cyan_1.png" },
+      { id: "ranger", name: "Ranger", cost: 1200, src: "assets/characters/player_cyan_2.png" },
+      { id: "royal", name: "Royal", cost: 2200, src: "assets/characters/player_cyan_3.png" },
+      { id: "ruby", name: "Ruby", cost: 3500, src: "assets/characters/player_cyan_4.png" },
+      { id: "silver", name: "Silver", cost: 5000, src: "assets/characters/player_cyan_5.png" },
+      { id: "gold", name: "Gold", cost: 7000, src: "assets/characters/player_cyan_6.png" },
+      { id: "obsidian", name: "Obsidian", cost: 9000, src: "assets/characters/player_cyan_7.png" }
+    ];
+
+    const CHARACTER_ID_ALIASES = {
+      pearl: "obsidian"
+    };
+
     const screens = {
       splash: document.getElementById("splashScreen"),
       settings: document.getElementById("settingsScreen"),
+      characters: document.getElementById("characterScreen"),
       game: document.getElementById("gameScreen")
     };
 
@@ -782,7 +925,10 @@
     const startButton = document.getElementById("startButton");
     const settingsButton = document.getElementById("settingsButton");
     const settingsStartButton = document.getElementById("settingsStartButton");
+    const settingsResetButton = document.getElementById("settingsResetButton");
     const settingsBackButton = document.getElementById("settingsBackButton");
+    const charactersButton = document.getElementById("charactersButton");
+    const charactersBackButton = document.getElementById("charactersBackButton");
     const quitButton = document.getElementById("quitButton");
     const npcCountInput = document.getElementById("npcCountInput");
     const roomSizeInput = document.getElementById("roomSizeInput");
@@ -805,6 +951,8 @@
     const levelHud = document.getElementById("levelHud");
     const scoreHud = document.getElementById("scoreHud");
     const equationHud = document.getElementById("equationHud");
+    const characterShopScore = document.getElementById("characterShopScore");
+    const characterShopGrid = document.getElementById("characterShopGrid");
     const toast = document.getElementById("toast");
 
     const keys = new Set();
@@ -818,6 +966,7 @@
     };
     const images = {
       player: null,
+      players: {},
       npcs: [],
       exitDoorSign: null,
       walls: {}
@@ -834,6 +983,7 @@
       wrongExitCooldown: 0,
       lastTimestamp: 0,
       settings: loadSettings(),
+      characterState: loadCharacterState(),
       leaderboard: loadLeaderboard(),
       room: ROOM,
       equation: null,
@@ -954,6 +1104,92 @@
       localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(game.settings));
     }
 
+    function defaultCharacterState() {
+      return { owned: ["default"], selected: "default" };
+    }
+
+    function validCharacterId(id) {
+      return CHARACTER_OPTIONS.some((option) => option.id === id);
+    }
+
+    function normalizeCharacterId(id) {
+      return CHARACTER_ID_ALIASES[id] || id;
+    }
+
+    function loadCharacterState() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.characters));
+        const owned = Array.isArray(stored?.owned)
+          ? stored.owned.map(normalizeCharacterId).filter(validCharacterId)
+          : [];
+        if (!owned.includes("default")) owned.unshift("default");
+        const selectedId = normalizeCharacterId(stored?.selected);
+        const selected = validCharacterId(selectedId) && owned.includes(selectedId)
+          ? selectedId
+          : "default";
+        return { owned: Array.from(new Set(owned)), selected };
+      } catch {
+        return defaultCharacterState();
+      }
+    }
+
+    function saveCharacterState() {
+      localStorage.setItem(STORAGE_KEYS.characters, JSON.stringify(game.characterState));
+    }
+
+    function selectedCharacterOption() {
+      return CHARACTER_OPTIONS.find((option) => option.id === game.characterState.selected) || CHARACTER_OPTIONS[0];
+    }
+
+    function getPlayerImage() {
+      const option = selectedCharacterOption();
+      return images.players[option.id] || images.player;
+    }
+
+    function renderCharacterShop() {
+      characterShopScore.textContent = `Score ${game.score}`;
+      characterShopGrid.innerHTML = "";
+
+      for (const option of CHARACTER_OPTIONS) {
+        const owned = game.characterState.owned.includes(option.id);
+        const selected = game.characterState.selected === option.id;
+        const affordable = game.score >= option.cost;
+        const card = document.createElement("div");
+        card.className = `character-card${selected ? " selected" : ""}`;
+        card.innerHTML = `
+          <div class="character-preview">
+            <img src="${option.src}" alt="${option.name}">
+          </div>
+          <div class="character-meta">
+            <span>${option.name}</span>
+            <span class="character-cost">${option.cost ? `${option.cost} pts` : "Free"}</span>
+          </div>
+        `;
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = selected ? "Selected" : owned ? "Use" : `Buy ${option.cost}`;
+        button.disabled = selected || (!owned && !affordable);
+        button.addEventListener("click", () => {
+          if (!owned) {
+            if (game.score < option.cost) {
+              showToast("Not enough score points.", 1100);
+              return;
+            }
+            game.score -= option.cost;
+            game.characterState.owned.push(option.id);
+          }
+          game.characterState.selected = option.id;
+          game.characterState.owned = Array.from(new Set(game.characterState.owned));
+          saveCharacterState();
+          updateHud();
+          renderCharacterShop();
+        });
+        card.appendChild(button);
+        characterShopGrid.appendChild(card);
+      }
+    }
+
     function loadLeaderboard() {
       try {
         const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.leaderboard));
@@ -1029,6 +1265,7 @@
       }
       if (name === "splash") renderLeaderboard();
       if (name === "settings") syncSettingsForm();
+      if (name === "characters") renderCharacterShop();
       if (name === "game") resizeCanvas();
       syncMusic();
     }
@@ -1090,6 +1327,31 @@
       syncSettingsForm();
     }
 
+    function resetAllSettingsAndProgress() {
+      game.settings = {
+        ...DEFAULT_SETTINGS,
+        allowedBValues: [...DEFAULT_SETTINGS.allowedBValues]
+      };
+      applyRoomSize();
+      saveSettings();
+
+      game.score = 0;
+      game.level = 1;
+      game.highestLevelReached = 1;
+      game.characterState = defaultCharacterState();
+      game.leaderboard = [];
+      localStorage.removeItem(STORAGE_KEYS.characters);
+      localStorage.removeItem(STORAGE_KEYS.leaderboard);
+
+      syncSettingsForm();
+      levelHud.textContent = `Level ${game.level}`;
+      scoreHud.textContent = `Score ${game.score}`;
+      if (game.equation) updateHud();
+      renderLeaderboard();
+      syncMusic();
+      showToast("Reset complete.", 1100);
+    }
+
     function loadImage(src) {
       const image = new Image();
       image.onload = () => { image.ready = true; };
@@ -1100,6 +1362,9 @@
 
     function loadSprites() {
       images.player = loadImage(SPRITE_PATHS.player);
+      images.players = Object.fromEntries(
+        CHARACTER_OPTIONS.map((option) => [option.id, loadImage(option.src)])
+      );
       images.npcs = SPRITE_PATHS.npcs.map(loadImage);
       images.exitDoorSign = loadImage(SPRITE_PATHS.exitDoorSign);
       images.walls = Object.fromEntries(
@@ -2444,7 +2709,7 @@
     function drawCharacter(character, options = {}) {
       const p = project(character.x, character.y);
       const isPlayer = character.type === "player";
-      const image = isPlayer ? images.player : images.npcs[character.spriteIndex % images.npcs.length];
+      const image = isPlayer ? getPlayerImage() : images.npcs[character.spriteIndex % images.npcs.length];
       const size = isPlayer
         ? clamp(tileWidth() * 1.05, 30, 82)
         : clamp(tileWidth() * 0.95, 28, 74);
@@ -2649,10 +2914,13 @@
     startButton.addEventListener("click", startRun);
     settingsStartButton.addEventListener("click", startRun);
     settingsButton.addEventListener("click", () => showScreen("settings"));
+    settingsResetButton.addEventListener("click", resetAllSettingsAndProgress);
     settingsBackButton.addEventListener("click", () => {
       readSettingsForm();
       showScreen("splash");
     });
+    charactersButton.addEventListener("click", () => showScreen("characters"));
+    charactersBackButton.addEventListener("click", () => showScreen("game"));
     quitButton.addEventListener("click", quitToMenu);
 
     npcCountInput.addEventListener("change", readSettingsForm);
