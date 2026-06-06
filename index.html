@@ -281,10 +281,30 @@
       grid-column: 1 / -1;
     }
 
+    .setting-card.wide {
+      grid-column: span 2;
+    }
+
     label {
       display: block;
       font-weight: 800;
       color: #31535c;
+    }
+
+    .setting-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .setting-icon {
+      display: inline-grid;
+      flex: 0 0 auto;
+      place-items: center;
+      width: 1.35em;
+      color: #111;
+      font-size: 0.95em;
+      line-height: 1;
     }
 
     .hint {
@@ -413,7 +433,7 @@
       width: 35%;
       height: 23.6%;
       display: grid;
-      grid-template-rows: auto 1fr auto;
+      grid-template-rows: auto 1fr;
       gap: 0.65em;
       padding: 0.75em 0.9em;
       pointer-events: none;
@@ -486,21 +506,29 @@
       box-shadow: 0 5px 0 rgba(157, 116, 22, 0.22);
     }
 
-    .hud-bottom {
-      display: flex;
-      justify-content: center;
-      width: 100%;
-      pointer-events: auto;
-    }
-
-    .hud button {
-      min-height: 2em;
+    .hud-menu-button {
+      position: absolute;
+      right: 0.9em;
+      bottom: 0.75em;
+      display: grid;
+      place-items: center;
+      width: 2.15em;
+      height: 2.15em;
+      min-height: 0;
       border: 1px solid rgba(31, 99, 109, 0.18);
-      padding: 0.35em 0.7em;
+      border-radius: 999px;
+      padding: 0;
       color: #31535c;
       background: rgba(233, 245, 242, 0.82);
       box-shadow: 0 2px 0 rgba(31, 99, 109, 0.14);
-      font-size: 0.95em;
+      font-size: 1.05em;
+      line-height: 1;
+      pointer-events: auto;
+    }
+
+    .hud-menu-button .gear-icon {
+      display: block;
+      transform: translateY(-0.02em);
     }
 
     .toast {
@@ -527,6 +555,10 @@
     @media (max-width: 960px) {
       .settings-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .setting-card.wide {
+        grid-column: 1 / -1;
       }
     }
 
@@ -569,43 +601,43 @@
 
       <div class="settings-grid">
         <div class="setting-card">
-          <label for="npcCountInput">Starting NPCs</label>
+          <label class="setting-title" for="npcCountInput"><span class="setting-icon" aria-hidden="true">●</span><span>Starting NPCs</span></label>
           <p class="hint">More NPCs means more swaps and a higher score multiplier.</p>
           <input id="npcCountInput" type="number" min="1" max="14" step="1">
         </div>
 
         <div class="setting-card">
-          <label for="roomSizeInput">Room size</label>
+          <label class="setting-title" for="roomSizeInput"><span class="setting-icon" aria-hidden="true">□</span><span>Room size</span></label>
           <p class="hint">Number of tiles per side. 10 means a 10 x 10 room.</p>
           <input id="roomSizeInput" type="number" min="6" max="20" step="1">
         </div>
 
         <div class="setting-card">
-          <label for="wallCountInput">Walls</label>
+          <label class="setting-title" for="wallCountInput"><span class="setting-icon" aria-hidden="true">▥</span><span>Walls</span></label>
           <p class="hint">Random short walls block movement. More walls award more points.</p>
           <input id="wallCountInput" type="number" min="0" max="12" step="1">
         </div>
 
         <div class="setting-card">
-          <label for="awarenessInput">Starting awareness <span id="awarenessValue"></span></label>
+          <label class="setting-title" for="awarenessInput"><span class="setting-icon" aria-hidden="true">◌</span><span>Starting awareness <span id="awarenessValue"></span></span></label>
           <p class="hint">0 is random wandering. 1 covers the whole room.</p>
           <input id="awarenessInput" type="range" min="0" max="1" step="0.05">
         </div>
 
         <div class="setting-card">
-          <label for="speedInput">Speed <span id="speedValue"></span></label>
+          <label class="setting-title" for="speedInput"><span class="setting-icon" aria-hidden="true">▶</span><span>Speed <span id="speedValue"></span></span></label>
           <p class="hint">Higher speed is harder and awards more points.</p>
           <input id="speedInput" type="range" min="0.75" max="1.75" step="0.05">
         </div>
 
         <div class="setting-card">
-          <label for="playerNpcSpeedRatioInput">Player speed ratio <span id="playerNpcSpeedRatioValue"></span></label>
+          <label class="setting-title" for="playerNpcSpeedRatioInput"><span class="setting-icon" aria-hidden="true">↔</span><span>Player speed ratio <span id="playerNpcSpeedRatioValue"></span></span></label>
           <p class="hint">Above 1 makes the player faster than NPCs. Below 1 is harder and awards more points.</p>
           <input id="playerNpcSpeedRatioInput" type="range" min="0.5" max="1.5" step="0.05">
         </div>
 
         <div class="setting-card">
-          <label for="showAwarenessInput">Awareness rings</label>
+          <label class="setting-title" for="showAwarenessInput"><span class="setting-icon" aria-hidden="true">◎</span><span>Awareness rings</span></label>
           <p class="hint">Show or hide the NPC awareness radius overlays.</p>
           <label class="toggle-row">
             <input id="showAwarenessInput" type="checkbox">
@@ -614,7 +646,7 @@
         </div>
 
         <div class="setting-card">
-          <label for="axisMovementInput">Movement along axes</label>
+          <label class="setting-title" for="axisMovementInput"><span class="setting-icon" aria-hidden="true">↕</span><span>Movement along axes</span></label>
           <p class="hint">Use room tile axes instead of screen left, right, up, and down.</p>
           <label class="toggle-row">
             <input id="axisMovementInput" type="checkbox">
@@ -623,7 +655,7 @@
         </div>
 
         <div class="setting-card">
-          <label for="musicInput">Background music</label>
+          <label class="setting-title" for="musicInput"><span class="setting-icon" aria-hidden="true">♪</span><span>Background music</span></label>
           <p class="hint">Play a gentle royalty-free procedural loop during the game.</p>
           <label class="toggle-row">
             <input id="musicInput" type="checkbox">
@@ -632,7 +664,7 @@
         </div>
 
         <div class="setting-card">
-          <label for="soundEffectsInput">Sound effects</label>
+          <label class="setting-title" for="soundEffectsInput"><span class="setting-icon" aria-hidden="true">◉</span><span>Sound effects</span></label>
           <p class="hint">Play sounds for swaps, correct exits, and wrong exits.</p>
           <label class="toggle-row">
             <input id="soundEffectsInput" type="checkbox">
@@ -640,8 +672,8 @@
           </label>
         </div>
 
-        <div class="setting-card full">
-          <label>Square state duration <span id="squareStateDurationValue"></span></label>
+        <div class="setting-card wide">
+          <label class="setting-title"><span class="setting-icon" aria-hidden="true">◷</span><span>Square state duration <span id="squareStateDurationValue"></span></span></label>
           <p class="hint">Seconds each NPC stays in attract or repel mode before switching. Range: 5 to 30 seconds.</p>
           <div class="range-pair">
             <label class="range-pair-row" for="squareStateMinInput">
@@ -656,7 +688,7 @@
         </div>
 
         <div class="setting-card full">
-          <label>Allowed values for B</label>
+          <label class="setting-title"><span class="setting-icon" aria-hidden="true">×</span><span>Allowed values for B</span></label>
           <p class="hint">Choose the multiplication tables used to generate rooms.</p>
           <div id="bValueChecks" class="check-grid"></div>
         </div>
@@ -680,9 +712,9 @@
         <div class="hud-board-card" aria-live="polite">
           <div id="equationHud" class="hud-equation">2 &times; 3 = <span class="missing-slot">?</span></div>
         </div>
-        <div class="hud-bottom">
-          <button id="quitButton" type="button">Menu</button>
-        </div>
+        <button id="quitButton" class="hud-menu-button" type="button" aria-label="Open menu">
+          <span class="gear-icon" aria-hidden="true">&#9881;</span>
+        </button>
       </div>
     </div>
     <div id="toast" class="toast"></div>
@@ -833,6 +865,17 @@
 
     function choice(items) {
       return items[Math.floor(Math.random() * items.length)];
+    }
+
+    function shuffled(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = randomInt(0, i);
+        const temp = copy[i];
+        copy[i] = copy[j];
+        copy[j] = temp;
+      }
+      return copy;
     }
 
     function distance(a, b) {
@@ -1141,23 +1184,48 @@
       return `${equation.a} x ${equation.b} = ${equation.c}`;
     }
 
-    function makeDistractorNumbers() {
+    function makeDistractorNumbers(requiredCount = game.currentNpcCount) {
       const target = game.equation.targetNumber;
       const candidates = new Set();
 
       if (game.equation.missing === "b") {
-        for (const b of game.settings.allowedBValues) candidates.add(b);
+        for (let value = 2; value <= 12; value += 1) candidates.add(value);
       } else {
         for (const b of game.settings.allowedBValues) {
           for (let a = 2; a <= 12; a += 1) candidates.add(a * b);
         }
       }
 
+      candidates.delete(target);
+      if (![...candidates].some((value) => value < target) && target > 1) candidates.add(target - 1);
+      if (![...candidates].some((value) => value > target)) candidates.add(target + 1);
+      for (let offset = 1; candidates.size < requiredCount && offset <= 144; offset += 1) {
+        if (target - offset >= 1) candidates.add(target - offset);
+        candidates.add(target + offset);
+      }
+
       const nearby = Array.from(candidates)
-        .filter((value) => value !== target)
         .sort((a, b) => Math.abs(a - target) - Math.abs(b - target) || a - b);
-      const poolSize = clamp(game.currentNpcCount + 4, 6, nearby.length);
+      const poolSize = clamp(requiredCount + 4, requiredCount, nearby.length);
       return nearby.slice(0, poolSize);
+    }
+
+    function pickBalancedDistractorNumbers(requiredCount) {
+      const target = game.equation.targetNumber;
+      const pool = makeDistractorNumbers(requiredCount);
+      const smaller = pool.filter((value) => value < target);
+      const greater = pool.filter((value) => value > target);
+      const picked = [];
+
+      if (smaller.length) picked.push(smaller[0]);
+      if (greater.length && picked.length < requiredCount) picked.push(greater[0]);
+
+      for (const value of pool) {
+        if (picked.length >= requiredCount) break;
+        if (!picked.includes(value)) picked.push(value);
+      }
+
+      return shuffled(picked);
     }
 
     function createCharacter(type, x, y, carriedNumber, index = 0) {
@@ -1340,8 +1408,10 @@
       game.currentAwarenessAmount = getLevelAwarenessAmount(game.settings, game.level);
       game.walls = generateWalls();
       const awarenessRadius = getAwarenessRadius(game.currentAwarenessAmount, ROOM);
-      const distractors = makeDistractorNumbers();
-      const playerNumber = choice(distractors.length ? distractors : game.settings.allowedBValues);
+      const distractors = pickBalancedDistractorNumbers(game.currentNpcCount);
+      let distractorIndex = 0;
+      const nextDistractorNumber = () => distractors[distractorIndex++];
+      const playerNumber = nextDistractorNumber();
       game.player = createCharacter("player", PLAYER_START.x, PLAYER_START.y, playerNumber);
       game.npcs = [];
 
@@ -1350,7 +1420,7 @@
         const spawn = randomSpawn(i);
         const number = i === targetIndex
           ? game.equation.targetNumber
-          : choice(distractors.length ? distractors : game.settings.allowedBValues);
+          : nextDistractorNumber();
         const npc = createCharacter("npc", spawn.x, spawn.y, number, i % images.npcs.length);
         npc.awarenessRadius = awarenessRadius;
         game.npcs.push(npc);
