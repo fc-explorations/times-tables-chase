@@ -299,17 +299,24 @@ Nearby characters may include:
 - The player.
 - Other NPCs.
 
-If multiple characters are inside the awareness radius, the NPC must focus on the closest one. The closest character determines whether the NPC moves toward or away from that target, depending on the NPC's current square-wave mode.
+If the player is inside an NPC's awareness radius, the NPC must always focus on the player, even if another NPC is closer. This prevents NPCs from getting locked into stable NPC-vs-NPC attraction pairs while ignoring the player.
+
+If the player is not inside the awareness radius and multiple NPCs are inside it, the NPC should focus on the closest NPC. The chosen focus determines whether the NPC moves toward or away from that target, depending on the NPC's current square-wave mode.
 
 Pseudo-code:
 
 ```js
 function findAwarenessTarget(npc, characters) {
+  if (distanceBetween(npc, player) < npc.awarenessRadius) {
+    return player;
+  }
+
   let closest = null;
   let closestDistance = Infinity;
 
   for (const other of characters) {
     if (other === npc) continue;
+    if (other.type === "player") continue;
 
     const distance = distanceBetween(npc, other);
     if (distance < npc.awarenessRadius && distance < closestDistance) {

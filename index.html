@@ -1014,10 +1014,14 @@
 
     function findAwarenessTarget(npc, characters) {
       if (npc.awarenessRadius <= 0) return null;
+      if (game.player && distance(npc, game.player) < npc.awarenessRadius) {
+        return game.player;
+      }
+
       let closest = null;
       let closestDistance = Infinity;
       for (const other of characters) {
-        if (other === npc) continue;
+        if (other === npc || other.type === "player") continue;
         const d = distance(npc, other);
         if (d < npc.awarenessRadius && d < closestDistance) {
           closest = other;
