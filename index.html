@@ -394,20 +394,22 @@
       width: min(100vw, calc(100vh * 1672 / 941));
       aspect-ratio: 1672 / 941;
       transform: translateX(-50%);
-      font-size: clamp(10px, min(1vw, 1.78vh), 16px);
+      font-size: clamp(9px, min(1vw, 1.78vh), 16px);
+      container-type: size;
+      font-size: clamp(9px, 1.15cqw, 16px);
       pointer-events: none;
     }
 
     .hud {
       position: absolute;
-      top: 10%;
-      left: 12%;
-      width: 76%;
-      height: 53%;
+      top: 6.8%;
+      left: 32.2%;
+      width: 35%;
+      height: 23.6%;
       display: grid;
       grid-template-rows: auto 1fr auto;
-      gap: 12px;
-      padding: clamp(14px, 1.4vw, 22px);
+      gap: 0.65em;
+      padding: 0.75em 0.9em;
       pointer-events: none;
     }
 
@@ -422,14 +424,14 @@
 
     .hud-badge {
       width: fit-content;
-      min-height: 32px;
+      min-height: 2em;
       border: 2px solid rgba(31, 99, 109, 0.18);
       border-radius: 8px;
-      padding: 5px 10px;
+      padding: 0.35em 0.7em;
       background: rgba(255, 246, 199, 0.9);
       box-shadow: 0 4px 0 rgba(31, 99, 109, 0.12);
       color: #16636d;
-      font-size: 1.35em;
+      font-size: 1em;
       font-weight: 900;
     }
 
@@ -440,10 +442,10 @@
     .hud-board-card {
       align-self: center;
       justify-self: center;
-      width: 72%;
+      width: min(88%, 25em);
       border: 2px solid rgba(29, 104, 111, 0.2);
       border-radius: 8px;
-      padding: clamp(12px, 1.4vw, 18px) clamp(12px, 1.9vw, 24px);
+      padding: 0.75em 1.2em;
       background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 255, 252, 0.78)),
         rgba(251, 252, 247, 0.84);
@@ -456,7 +458,8 @@
 
     .hud-equation {
       color: #16636d;
-      font-size: 3.2em;
+      font-size: 2.35em;
+      font-size: clamp(1.85em, 4.8cqw, 2.75em);
       line-height: 1;
       font-weight: 1000;
       letter-spacing: 0;
@@ -479,19 +482,19 @@
 
     .hud-bottom {
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
       width: 100%;
       pointer-events: auto;
     }
 
     .hud button {
-      min-height: 32px;
+      min-height: 2em;
       border: 1px solid rgba(31, 99, 109, 0.18);
-      padding: 5px 10px;
+      padding: 0.35em 0.7em;
       color: #31535c;
       background: rgba(233, 245, 242, 0.82);
       box-shadow: 0 2px 0 rgba(31, 99, 109, 0.14);
-      font-size: 1.28em;
+      font-size: 0.95em;
     }
 
     .toast {
@@ -532,7 +535,7 @@
       }
 
       .hud {
-        padding: 10px;
+        padding: 0.6em 0.7em;
       }
     }
   </style>
@@ -688,18 +691,18 @@
     };
 
     const DEFAULT_SETTINGS = {
-      npcCount: 5,
-      allowedBValues: [2, 3, 4, 5],
-      awarenessAmount: 0.5,
-      roomSize: 10,
-      wallCount: 3,
-      speedMultiplier: 1,
-      playerNpcSpeedRatio: 1,
-      squareStateMinSeconds: 5,
-      squareStateMaxSeconds: 12,
+      npcCount: 6,
+      allowedBValues: [2, 4, 5],
+      awarenessAmount: 0.15,
+      roomSize: 16,
+      wallCount: 8,
+      speedMultiplier: 0.85,
+      playerNpcSpeedRatio: 1.1,
+      squareStateMinSeconds: 8,
+      squareStateMaxSeconds: 23,
       showAwareness: true,
-      axisMovement: true,
-      music: true,
+      axisMovement: false,
+      music: false,
       soundEffects: true
     };
 
@@ -1938,6 +1941,51 @@
         : wall.x + wall.y + wall.length / 2;
     }
 
+    function compareWallAndCharacter(wall, character) {
+      // Long wall sprites need screen-space ordering near their full visual segment.
+      // A single midpoint or endpoint depth makes the whole wall occlude from the wrong side.
+      const [a, b] = wallEndpoints(wall);
+      const start = project(a.x, a.y);
+      const end = project(b.x, b.y);
+      const foot = project(character.x, character.y);
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const lengthSq = dx * dx + dy * dy;
+
+      if (lengthSq > 0.001) {
+        const t = clamp(((foot.x - start.x) * dx + (foot.y - start.y) * dy) / lengthSq, 0, 1);
+        const closest = {
+          x: start.x + dx * t,
+          y: start.y + dy * t
+        };
+        const distanceToSegment = Math.hypot(foot.x - closest.x, foot.y - closest.y);
+        const overlapDistance = Math.max(54, tileWidth() * 0.82);
+        if (distanceToSegment <= overlapDistance) {
+          const depthGap = foot.y - closest.y;
+          const depthEpsilon = Math.max(4, tileHeight() * 0.12);
+          if (Math.abs(depthGap) > depthEpsilon) return depthGap > 0 ? -1 : 1;
+        }
+      }
+
+      const [nearestA, nearestB] = wall.axis === "x"
+        ? [clamp(character.x, wall.x, wall.x + wall.length), wall.y]
+        : [wall.x, clamp(character.y, wall.y, wall.y + wall.length)];
+      return nearestA + nearestB - (character.x + character.y);
+    }
+
+    function compareSceneObjects(a, b) {
+      if (a.type === "wall" && b.type === "character") {
+        const order = compareWallAndCharacter(a.wall, b.character);
+        if (Math.abs(order) > 0.001) return order;
+      } else if (a.type === "character" && b.type === "wall") {
+        const order = compareWallAndCharacter(b.wall, a.character);
+        if (Math.abs(order) > 0.001) return -order;
+      }
+
+      if (a.depth !== b.depth) return a.depth - b.depth;
+      return a.order - b.order;
+    }
+
     function drawWall(wall) {
       const [a, b] = wallEndpoints(wall);
       const start = project(a.x, a.y);
@@ -2021,22 +2069,30 @@
       ctx.restore();
     }
 
+    function exitDoorDrawMetrics() {
+      const drawHeight = Math.max(160, Math.min(220, tileWidth() * 2.7));
+      const image = images.exitDoorSign;
+      const aspect = image && image.width && image.height ? image.width / image.height : 1;
+      return {
+        width: drawHeight * aspect,
+        height: drawHeight
+      };
+    }
+
     function drawExit() {
       const p = project(EXIT.x, EXIT.y);
-      const shadowAngle = Math.atan2(tileHeight(), tileWidth());
       ctx.save();
       ctx.translate(p.x, p.y + 12);
-      ctx.filter = "blur(2px)";
-      ctx.fillStyle = "rgba(35, 49, 58, 0.13)";
-      ctx.beginPath();
-      ctx.ellipse(-43, 30, 24, 8, shadowAngle, 0, Math.PI * 2);
-      ctx.ellipse(43, 30, 24, 8, shadowAngle, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.filter = "none";
 
       if (images.exitDoorSign && images.exitDoorSign.ready) {
-        const size = Math.max(160, Math.min(220, tileWidth() * 2.7));
-        ctx.drawImage(images.exitDoorSign, -size / 2, -size + 36, size, size);
+        const metrics = exitDoorDrawMetrics();
+        ctx.drawImage(
+          images.exitDoorSign,
+          -metrics.width / 2,
+          -metrics.height + 36,
+          metrics.width,
+          metrics.height
+        );
         ctx.restore();
         return;
       }
@@ -2064,16 +2120,16 @@
       const p = project(EXIT.x, EXIT.y);
       ctx.save();
       if (images.exitDoorSign && images.exitDoorSign.ready) {
-        const size = Math.max(160, Math.min(220, tileWidth() * 2.7));
-        ctx.translate(p.x, p.y + 12 - size + 36);
-        ctx.translate(size * -0.01, size * 0.205);
+        const metrics = exitDoorDrawMetrics();
+        ctx.translate(p.x, p.y + 12 - metrics.height + 36);
+        ctx.translate(metrics.width * -0.01, metrics.height * 0.205);
         ctx.rotate(0.32);
         ctx.transform(1, 0, -0.04, 1, 0, 0);
         ctx.fillStyle = "#156a72";
-        ctx.font = `900 ${Math.max(11, Math.round(size * 0.052))}px Inter, sans-serif`;
+        ctx.font = `900 ${Math.max(10, Math.round(metrics.height * 0.052))}px Inter, sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(formatEquation(game.equation), 0, 0, size * 0.5);
+        ctx.fillText(formatEquation(game.equation), 0, 0, metrics.width * 0.72);
         ctx.restore();
         return;
       }
@@ -2127,11 +2183,12 @@
       ctx.restore();
     }
 
-    function drawCharacter(character) {
+    function drawCharacter(character, options = {}) {
       const p = project(character.x, character.y);
       const isPlayer = character.type === "player";
       const image = isPlayer ? images.player : images.npcs[character.spriteIndex % images.npcs.length];
       const size = isPlayer ? 82 : 74;
+      const drawBadge = options.badge !== false;
       const jitter = isPlayer && game.pendingTeleport
         ? {
           x: Math.sin(game.timeSeconds * 95) * 3.2,
@@ -2152,6 +2209,22 @@
         drawFallbackCharacter(isPlayer);
       }
 
+      if (drawBadge) drawNumberBadge(character.carriedNumber, isPlayer);
+      ctx.restore();
+    }
+
+    function drawCharacterBadge(character) {
+      const p = project(character.x, character.y);
+      const isPlayer = character.type === "player";
+      const jitter = isPlayer && game.pendingTeleport
+        ? {
+          x: Math.sin(game.timeSeconds * 95) * 3.2,
+          y: Math.cos(game.timeSeconds * 111) * 2.2
+        }
+        : { x: 0, y: 0 };
+
+      ctx.save();
+      ctx.translate(p.x + jitter.x, p.y + jitter.y);
       drawNumberBadge(character.carriedNumber, isPlayer);
       ctx.restore();
     }
@@ -2270,15 +2343,19 @@
       for (const npc of game.npcs) drawAwareness(npc);
 
       const sceneObjects = [
-        ...game.walls.map((wall) => ({ type: "wall", depth: wallDepth(wall), wall })),
+        ...game.walls.map((wall, index) => ({ type: "wall", depth: wallDepth(wall), wall, order: index })),
         ...[game.player, ...game.npcs]
           .filter(Boolean)
-          .map((character) => ({ type: "character", depth: character.x + character.y, character }))
+          .map((character, index) => ({ type: "character", depth: character.x + character.y, character, order: game.walls.length + index }))
       ];
-      sceneObjects.sort((a, b) => a.depth - b.depth);
+      sceneObjects.sort(compareSceneObjects);
       for (const object of sceneObjects) {
         if (object.type === "wall") drawWall(object.wall);
-        else drawCharacter(object.character);
+        else drawCharacter(object.character, { badge: false });
+      }
+
+      for (const character of [game.player, ...game.npcs].filter(Boolean)) {
+        drawCharacterBadge(character);
       }
 
       drawSwapEffects();
