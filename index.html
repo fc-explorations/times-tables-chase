@@ -1,0 +1,1434 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Times Table Chase</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      --ink: #23313a;
+      --muted: #60717a;
+      --panel: #fbfcf7;
+      --line: #c8ddd7;
+      --cyan: #20c7d9;
+      --green: #34c77b;
+      --blue: #2f80ed;
+      --coral: #ee675c;
+      --yellow: #ffd166;
+      --shadow: rgba(36, 49, 58, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #dff1ee;
+      color: var(--ink);
+      font-family: Inter, ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      min-height: 44px;
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: #fff;
+      background: var(--blue);
+      box-shadow: 0 3px 0 rgba(24, 79, 146, 0.35);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    button:hover {
+      filter: brightness(1.04);
+    }
+
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 rgba(24, 79, 146, 0.35);
+    }
+
+    button.secondary {
+      color: var(--ink);
+      background: #e9f5f2;
+      box-shadow: 0 3px 0 #bfd8d1;
+    }
+
+    button.danger {
+      background: var(--coral);
+      box-shadow: 0 3px 0 rgba(153, 59, 52, 0.38);
+    }
+
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: none;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    .menu-screen {
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.58), rgba(255,255,255,0.12)),
+        repeating-linear-gradient(45deg, rgba(47,128,237,0.09) 0 2px, transparent 2px 36px),
+        #dff1ee;
+    }
+
+    .menu-panel {
+      width: min(920px, 100%);
+      max-height: calc(100vh - 56px);
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 28px;
+      background: var(--panel);
+      box-shadow: 0 18px 50px var(--shadow);
+    }
+
+    .title-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: start;
+    }
+
+    h1,
+    h2 {
+      margin: 0;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: clamp(34px, 7vw, 72px);
+      line-height: 0.95;
+      color: #156a72;
+    }
+
+    h2 {
+      font-size: 26px;
+    }
+
+    .subtitle {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 18px;
+      max-width: 620px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .leaderboard {
+      margin-top: 28px;
+      border-top: 1px solid var(--line);
+      padding-top: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #dcebe7;
+      text-align: left;
+      font-size: 15px;
+    }
+
+    th {
+      color: #41616b;
+      background: #edf7f5;
+    }
+
+    .empty {
+      color: var(--muted);
+      margin: 12px 0 0;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .setting-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: #fff;
+    }
+
+    .setting-card.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-weight: 800;
+      color: #31535c;
+    }
+
+    .hint {
+      margin: 6px 0 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid #b7d2cb;
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #fbfffd;
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    .check-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(48px, 1fr));
+      gap: 8px;
+    }
+
+    .check-pill {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      border: 1px solid #b7d2cb;
+      border-radius: 8px;
+      background: #fbfffd;
+      color: var(--ink);
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .check-pill input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .check-pill:has(input:checked) {
+      border-color: #2f80ed;
+      background: #dceeff;
+      color: #14599f;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .toggle-row input {
+      width: 20px;
+      height: 20px;
+      accent-color: #2f80ed;
+    }
+
+    #gameScreen {
+      display: none;
+      background: #dff1ee;
+    }
+
+    #gameScreen.active {
+      display: block;
+    }
+
+    #gameCanvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      background:
+        linear-gradient(180deg, #eaf8f5, #d7ece8);
+    }
+
+    .hud {
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      pointer-events: none;
+    }
+
+    .hud-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .hud-pill {
+      min-height: 38px;
+      border: 1px solid rgba(49, 83, 92, 0.18);
+      border-radius: 8px;
+      padding: 8px 12px;
+      background: rgba(251, 252, 247, 0.92);
+      box-shadow: 0 8px 24px rgba(36, 49, 58, 0.12);
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .hud-pill.equation {
+      color: #16636d;
+      font-size: 18px;
+    }
+
+    .hud button {
+      min-height: 38px;
+      padding: 7px 12px;
+      box-shadow: 0 2px 0 rgba(153, 59, 52, 0.38);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      max-width: min(560px, calc(100vw - 32px));
+      transform: translateX(-50%);
+      border-radius: 8px;
+      padding: 12px 16px;
+      background: rgba(35, 49, 58, 0.92);
+      color: #fff;
+      font-weight: 800;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 160ms ease;
+    }
+
+    .toast.visible {
+      opacity: 1;
+    }
+
+    @media (max-width: 720px) {
+      .title-row,
+      .settings-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .check-grid {
+        grid-template-columns: repeat(4, minmax(48px, 1fr));
+      }
+
+      .hud {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section id="splashScreen" class="screen menu-screen active">
+    <div class="menu-panel">
+      <div class="title-row">
+        <div>
+          <h1>Times Table Chase</h1>
+          <p class="subtitle">Swap numbers with wandering classmates, solve the equation, and reach the exit with the right answer.</p>
+        </div>
+        <div class="button-row">
+          <button id="startButton" type="button">Start</button>
+          <button id="settingsButton" class="secondary" type="button">Settings</button>
+        </div>
+      </div>
+      <div class="leaderboard">
+        <h2>Leaderboard</h2>
+        <div id="leaderboardContent"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="settingsScreen" class="screen menu-screen">
+    <div class="menu-panel">
+      <h2>Settings</h2>
+      <p class="subtitle">These values set level 1. Later rooms automatically add more NPCs and awareness.</p>
+
+      <div class="settings-grid">
+        <div class="setting-card">
+          <label for="npcCountInput">Starting NPCs</label>
+          <p class="hint">More NPCs means more swaps and a higher score multiplier.</p>
+          <input id="npcCountInput" type="number" min="1" max="14" step="1">
+        </div>
+
+        <div class="setting-card">
+          <label for="roomSizeInput">Room size</label>
+          <p class="hint">Number of tiles per side. 10 means a 10 x 10 room.</p>
+          <input id="roomSizeInput" type="number" min="6" max="18" step="1">
+        </div>
+
+        <div class="setting-card">
+          <label for="awarenessInput">Starting awareness <span id="awarenessValue"></span></label>
+          <p class="hint">0 is random wandering. 1 covers the whole room.</p>
+          <input id="awarenessInput" type="range" min="0" max="1" step="0.05">
+        </div>
+
+        <div class="setting-card">
+          <label for="speedInput">Speed <span id="speedValue"></span></label>
+          <p class="hint">Higher speed is harder and awards more points.</p>
+          <input id="speedInput" type="range" min="0.75" max="1.75" step="0.05">
+        </div>
+
+        <div class="setting-card">
+          <label for="playerNpcSpeedRatioInput">Player speed ratio <span id="playerNpcSpeedRatioValue"></span></label>
+          <p class="hint">Above 1 makes the player faster than NPCs. Below 1 is harder and awards more points.</p>
+          <input id="playerNpcSpeedRatioInput" type="range" min="0.5" max="1.5" step="0.05">
+        </div>
+
+        <div class="setting-card">
+          <label for="showAwarenessInput">Awareness rings</label>
+          <p class="hint">Show or hide the NPC awareness radius overlays.</p>
+          <label class="toggle-row">
+            <input id="showAwarenessInput" type="checkbox">
+            <span>Visible</span>
+          </label>
+        </div>
+
+        <div class="setting-card full">
+          <label>Allowed values for B</label>
+          <p class="hint">Choose the multiplication tables used to generate rooms.</p>
+          <div id="bValueChecks" class="check-grid"></div>
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button id="settingsStartButton" type="button">Start</button>
+        <button id="settingsBackButton" class="secondary" type="button">Back</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="gameScreen" class="screen">
+    <canvas id="gameCanvas" width="1280" height="720"></canvas>
+    <div class="hud">
+      <div class="hud-group">
+        <div id="levelHud" class="hud-pill">Level 1</div>
+        <div id="scoreHud" class="hud-pill">Score 0</div>
+        <div id="equationHud" class="hud-pill equation">2 x 3 = ?</div>
+      </div>
+      <div class="hud-group">
+        <button id="quitButton" class="danger" type="button">Save & Menu</button>
+      </div>
+    </div>
+    <div id="toast" class="toast"></div>
+  </section>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEYS = {
+      settings: "timesTableChase.settings",
+      leaderboard: "timesTableChase.leaderboard"
+    };
+
+    const DEFAULT_SETTINGS = {
+      npcCount: 5,
+      allowedBValues: [2, 3, 4, 5],
+      awarenessAmount: 0.5,
+      roomSize: 10,
+      speedMultiplier: 1,
+      playerNpcSpeedRatio: 1,
+      showAwareness: true
+    };
+
+    const ROOM = {
+      width: 10,
+      height: 10,
+      tileWidth: 84,
+      tileHeight: 42
+    };
+
+    const PLAYER_START = { x: 0.55, y: 9.45 };
+    const EXIT = { x: 9.35, y: 0.65, radius: 0.65 };
+    const BASE_CHARACTER_SPEED = 2.8;
+    const SPRITE_PATHS = {
+      player: "assets/characters/player_cyan_idle.png",
+      npcs: [
+        "assets/characters/npc_orange_idle.png",
+        "assets/characters/npc_pink_idle.png",
+        "assets/characters/npc_yellow_idle.png",
+        "assets/characters/npc_violet_idle.png"
+      ],
+      exitDoorSign: "assets/room/exit_door_sign.png"
+    };
+
+    const screens = {
+      splash: document.getElementById("splashScreen"),
+      settings: document.getElementById("settingsScreen"),
+      game: document.getElementById("gameScreen")
+    };
+
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const startButton = document.getElementById("startButton");
+    const settingsButton = document.getElementById("settingsButton");
+    const settingsStartButton = document.getElementById("settingsStartButton");
+    const settingsBackButton = document.getElementById("settingsBackButton");
+    const quitButton = document.getElementById("quitButton");
+    const npcCountInput = document.getElementById("npcCountInput");
+    const roomSizeInput = document.getElementById("roomSizeInput");
+    const awarenessInput = document.getElementById("awarenessInput");
+    const awarenessValue = document.getElementById("awarenessValue");
+    const speedInput = document.getElementById("speedInput");
+    const speedValue = document.getElementById("speedValue");
+    const playerNpcSpeedRatioInput = document.getElementById("playerNpcSpeedRatioInput");
+    const playerNpcSpeedRatioValue = document.getElementById("playerNpcSpeedRatioValue");
+    const showAwarenessInput = document.getElementById("showAwarenessInput");
+    const bValueChecks = document.getElementById("bValueChecks");
+    const leaderboardContent = document.getElementById("leaderboardContent");
+    const levelHud = document.getElementById("levelHud");
+    const scoreHud = document.getElementById("scoreHud");
+    const equationHud = document.getElementById("equationHud");
+    const toast = document.getElementById("toast");
+
+    const keys = new Set();
+    const images = {
+      player: null,
+      npcs: [],
+      exitDoorSign: null
+    };
+
+    const game = {
+      screen: "splash",
+      running: false,
+      level: 1,
+      score: 0,
+      highestLevelReached: 1,
+      timeSeconds: 0,
+      levelTransitionTimer: 0,
+      wrongExitCooldown: 0,
+      lastTimestamp: 0,
+      settings: loadSettings(),
+      leaderboard: loadLeaderboard(),
+      room: ROOM,
+      equation: null,
+      currentNpcCount: 0,
+      currentAwarenessAmount: 0,
+      player: null,
+      npcs: [],
+      swapEffects: [],
+      activeContacts: new Set(),
+      nextCharacterId: 1,
+      message: ""
+    };
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function randomRange(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(randomRange(min, max + 1));
+    }
+
+    function choice(items) {
+      return items[Math.floor(Math.random() * items.length)];
+    }
+
+    function distance(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    function normalize(dx, dy) {
+      const length = Math.hypot(dx, dy);
+      if (length < 0.0001) return { x: 0, y: 0 };
+      return { x: dx / length, y: dy / length };
+    }
+
+    function fallbackDirection(seed) {
+      const angle = (seed * 2.399963229728653 + game.timeSeconds * 0.37) % (Math.PI * 2);
+      return { x: Math.cos(angle), y: Math.sin(angle) };
+    }
+
+    function todayString() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function loadSettings() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.settings));
+        if (!stored || !Array.isArray(stored.allowedBValues)) return { ...DEFAULT_SETTINGS };
+        const allowedBValues = stored.allowedBValues
+          .map(Number)
+          .filter((value) => Number.isInteger(value) && value >= 2 && value <= 12);
+        return {
+          npcCount: clamp(Number(stored.npcCount) || DEFAULT_SETTINGS.npcCount, 1, 14),
+          allowedBValues: allowedBValues.length ? allowedBValues : [...DEFAULT_SETTINGS.allowedBValues],
+          awarenessAmount: clamp(Number(stored.awarenessAmount) || 0, 0, 1),
+          roomSize: clamp(Math.floor(Number(stored.roomSize) || DEFAULT_SETTINGS.roomSize), 6, 18),
+          speedMultiplier: clamp(Number(stored.speedMultiplier) || DEFAULT_SETTINGS.speedMultiplier, 0.75, 1.75),
+          playerNpcSpeedRatio: clamp(Number(stored.playerNpcSpeedRatio) || DEFAULT_SETTINGS.playerNpcSpeedRatio, 0.5, 1.5),
+          showAwareness: typeof stored.showAwareness === "boolean" ? stored.showAwareness : DEFAULT_SETTINGS.showAwareness
+        };
+      } catch {
+        return { ...DEFAULT_SETTINGS };
+      }
+    }
+
+    function applyRoomSize() {
+      const size = clamp(Math.floor(Number(game.settings.roomSize) || DEFAULT_SETTINGS.roomSize), 6, 18);
+      game.settings.roomSize = size;
+      ROOM.width = size;
+      ROOM.height = size;
+      PLAYER_START.x = 0.55;
+      PLAYER_START.y = ROOM.height - 0.55;
+      EXIT.x = ROOM.width - 0.65;
+      EXIT.y = 0.65;
+    }
+
+    function saveSettings() {
+      localStorage.setItem(STORAGE_KEYS.settings, JSON.stringify(game.settings));
+    }
+
+    function loadLeaderboard() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEYS.leaderboard));
+        if (!Array.isArray(stored)) return [];
+        return stored
+          .filter((entry) => entry && Number.isFinite(Number(entry.score)))
+          .map((entry) => ({
+            name: String(entry.name || "Player").slice(0, 20),
+            score: Math.max(0, Math.floor(Number(entry.score))),
+            highestLevel: Math.max(1, Math.floor(Number(entry.highestLevel) || 1)),
+            date: String(entry.date || "")
+          }))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 10);
+      } catch {
+        return [];
+      }
+    }
+
+    function saveLeaderboard() {
+      localStorage.setItem(STORAGE_KEYS.leaderboard, JSON.stringify(game.leaderboard.slice(0, 10)));
+    }
+
+    function maybeRecordScore() {
+      if (game.score <= 0) return;
+      game.leaderboard.push({
+        name: "Player",
+        score: Math.floor(game.score),
+        highestLevel: game.highestLevelReached,
+        date: todayString()
+      });
+      game.leaderboard.sort((a, b) => b.score - a.score);
+      game.leaderboard = game.leaderboard.slice(0, 10);
+      saveLeaderboard();
+      renderLeaderboard();
+    }
+
+    function renderLeaderboard() {
+      if (!game.leaderboard.length) {
+        leaderboardContent.innerHTML = '<p class="empty">No scores yet. Solve a room to start the board.</p>';
+        return;
+      }
+
+      const rows = game.leaderboard.map((entry, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${entry.name}</td>
+          <td>${entry.score}</td>
+          <td>${entry.highestLevel}</td>
+          <td>${entry.date}</td>
+        </tr>
+      `).join("");
+
+      leaderboardContent.innerHTML = `
+        <table>
+          <thead>
+            <tr><th>#</th><th>Name</th><th>Score</th><th>Level</th><th>Date</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function showScreen(name) {
+      game.screen = name;
+      for (const [screenName, element] of Object.entries(screens)) {
+        element.classList.toggle("active", screenName === name);
+      }
+      game.running = name === "game";
+      if (name === "splash") renderLeaderboard();
+      if (name === "settings") syncSettingsForm();
+      if (name === "game") resizeCanvas();
+    }
+
+    function syncSettingsForm() {
+      npcCountInput.value = game.settings.npcCount;
+      roomSizeInput.value = game.settings.roomSize;
+      awarenessInput.value = game.settings.awarenessAmount;
+      awarenessValue.textContent = Number(game.settings.awarenessAmount).toFixed(2);
+      speedInput.value = game.settings.speedMultiplier;
+      speedValue.textContent = `${Number(game.settings.speedMultiplier).toFixed(2)}x`;
+      playerNpcSpeedRatioInput.value = game.settings.playerNpcSpeedRatio;
+      playerNpcSpeedRatioValue.textContent = `${Number(game.settings.playerNpcSpeedRatio).toFixed(2)}x`;
+      showAwarenessInput.checked = game.settings.showAwareness;
+      for (const input of bValueChecks.querySelectorAll("input")) {
+        input.checked = game.settings.allowedBValues.includes(Number(input.value));
+      }
+    }
+
+    function readSettingsForm() {
+      const selected = Array.from(bValueChecks.querySelectorAll("input:checked")).map((input) => Number(input.value));
+      game.settings = {
+        npcCount: clamp(Math.floor(Number(npcCountInput.value) || DEFAULT_SETTINGS.npcCount), 1, 14),
+        roomSize: clamp(Math.floor(Number(roomSizeInput.value) || DEFAULT_SETTINGS.roomSize), 6, 18),
+        allowedBValues: selected.length ? selected : [...DEFAULT_SETTINGS.allowedBValues],
+        awarenessAmount: clamp(Number(awarenessInput.value), 0, 1),
+        speedMultiplier: clamp(Number(speedInput.value) || DEFAULT_SETTINGS.speedMultiplier, 0.75, 1.75),
+        playerNpcSpeedRatio: clamp(Number(playerNpcSpeedRatioInput.value) || DEFAULT_SETTINGS.playerNpcSpeedRatio, 0.5, 1.5),
+        showAwareness: showAwarenessInput.checked
+      };
+      applyRoomSize();
+      saveSettings();
+      syncSettingsForm();
+    }
+
+    function buildSettingsForm() {
+      bValueChecks.innerHTML = "";
+      for (let value = 2; value <= 12; value += 1) {
+        const label = document.createElement("label");
+        label.className = "check-pill";
+        label.innerHTML = `<input type="checkbox" value="${value}"><span>${value}</span>`;
+        bValueChecks.appendChild(label);
+      }
+      syncSettingsForm();
+    }
+
+    function loadImage(src) {
+      const image = new Image();
+      image.onload = () => { image.ready = true; };
+      image.onerror = () => { image.ready = false; };
+      image.src = src;
+      return image;
+    }
+
+    function loadSprites() {
+      images.player = loadImage(SPRITE_PATHS.player);
+      images.npcs = SPRITE_PATHS.npcs.map(loadImage);
+      images.exitDoorSign = loadImage(SPRITE_PATHS.exitDoorSign);
+    }
+
+    function resizeCanvas() {
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(window.innerWidth * ratio);
+      canvas.height = Math.floor(window.innerHeight * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+
+    function tileWidth() {
+      const horizontalFit = Math.max(48, (window.innerWidth - 96) / ((ROOM.width + ROOM.height) / 2));
+      const verticalFit = Math.max(48, (window.innerHeight - 170) / (ROOM.height / 2));
+      return Math.min(ROOM.tileWidth, horizontalFit, verticalFit);
+    }
+
+    function tileHeight() {
+      return tileWidth() / 2;
+    }
+
+    function project(x, y) {
+      const tw = tileWidth();
+      const th = tileHeight();
+      const centerX = window.innerWidth / 2;
+      const floorHeight = ROOM.height * th;
+      const centerY = Math.max(92, Math.min(170, (window.innerHeight - floorHeight) / 2 + 18));
+      return {
+        x: centerX + (x - y) * tw / 2,
+        y: centerY + (x + y) * th / 2
+      };
+    }
+
+    function getLevelNpcCount(settings, level) {
+      return settings.npcCount + Math.floor((level - 1) / 2);
+    }
+
+    function getLevelAwarenessAmount(settings, level) {
+      return Math.min(1, settings.awarenessAmount + (level - 1) * 0.05);
+    }
+
+    function getAwarenessRadius(currentAwarenessAmount, room) {
+      return currentAwarenessAmount * Math.hypot(room.width, room.height);
+    }
+
+    function generateEquation() {
+      const a = randomInt(2, 12);
+      const b = choice(game.settings.allowedBValues);
+      const c = a * b;
+      const missing = Math.random() < Math.min(0.7, 0.35 + game.level * 0.04) ? "b" : "c";
+      return {
+        a,
+        b,
+        c,
+        missing,
+        targetNumber: missing === "b" ? b : c
+      };
+    }
+
+    function formatEquation(equation) {
+      if (!equation) return "";
+      return equation.missing === "b"
+        ? `${equation.a} x ? = ${equation.c}`
+        : `${equation.a} x ${equation.b} = ?`;
+    }
+
+    function solvedEquation(equation) {
+      return `${equation.a} x ${equation.b} = ${equation.c}`;
+    }
+
+    function makeDistractorNumbers() {
+      const numbers = new Set(game.settings.allowedBValues);
+      for (const b of game.settings.allowedBValues) {
+        for (let a = 2; a <= 12; a += 1) numbers.add(a * b);
+      }
+      return Array.from(numbers).filter((value) => value !== game.equation.targetNumber);
+    }
+
+    function createCharacter(type, x, y, carriedNumber, index = 0) {
+      return {
+        id: game.nextCharacterId++,
+        type,
+        x,
+        y,
+        vx: 0,
+        vy: 0,
+        carriedNumber,
+        speed: BASE_CHARACTER_SPEED * game.settings.speedMultiplier * (type === "player" ? game.settings.playerNpcSpeedRatio : 1),
+        radius: type === "player" ? 0.32 : 0.3,
+        interactionRadius: type === "player" ? 0.82 : 0.78,
+        swapCooldown: 0,
+        awarenessRadius: 0,
+        phase: randomRange(0, 5),
+        wavelength: randomRange(3.2, 6.2),
+        wanderTimer: 0,
+        wanderAngle: randomRange(0, Math.PI * 2),
+        spriteIndex: index
+      };
+    }
+
+    function randomSpawn(index) {
+      const margin = 1.35;
+      for (let attempts = 0; attempts < 100; attempts += 1) {
+        const x = randomRange(margin, ROOM.width - margin);
+        const y = randomRange(margin, ROOM.height - margin);
+        if (distance({ x, y }, PLAYER_START) > 2 && distance({ x, y }, EXIT) > 2) {
+          return { x, y };
+        }
+      }
+      return {
+        x: 2 + (index % 4) * 1.4,
+        y: 2 + Math.floor(index / 4) * 1.2
+      };
+    }
+
+    function startRun() {
+      readSettingsForm();
+      game.level = 1;
+      game.score = 0;
+      game.highestLevelReached = 1;
+      game.timeSeconds = 0;
+      game.levelTransitionTimer = 0;
+      game.wrongExitCooldown = 0;
+      game.swapEffects = [];
+      game.activeContacts.clear();
+      game.nextCharacterId = 1;
+      generateLevel();
+      updateHud();
+      showToast("Find the missing number, then reach the exit.", 1700);
+      showScreen("game");
+    }
+
+    function generateLevel() {
+      game.equation = generateEquation();
+      game.activeContacts.clear();
+      game.currentNpcCount = getLevelNpcCount(game.settings, game.level);
+      game.currentAwarenessAmount = getLevelAwarenessAmount(game.settings, game.level);
+      const awarenessRadius = getAwarenessRadius(game.currentAwarenessAmount, ROOM);
+      const distractors = makeDistractorNumbers();
+      const playerNumber = choice(distractors.length ? distractors : game.settings.allowedBValues);
+      game.player = createCharacter("player", PLAYER_START.x, PLAYER_START.y, playerNumber);
+      game.npcs = [];
+
+      const targetIndex = randomInt(0, game.currentNpcCount - 1);
+      for (let i = 0; i < game.currentNpcCount; i += 1) {
+        const spawn = randomSpawn(i);
+        const number = i === targetIndex
+          ? game.equation.targetNumber
+          : choice(distractors.length ? distractors : game.settings.allowedBValues);
+        const npc = createCharacter("npc", spawn.x, spawn.y, number, i % images.npcs.length);
+        npc.awarenessRadius = awarenessRadius;
+        game.npcs.push(npc);
+      }
+      updateHud();
+    }
+
+    function calculateRoomScore() {
+      const base = 100;
+      const levelBonus = game.level * 25;
+      const rangeBonus = game.settings.allowedBValues.length * 15;
+      const maxB = Math.max(...game.settings.allowedBValues);
+      const numberBonus = game.equation.a * 2 + game.equation.b * 3 + Math.floor(game.equation.c / 2) + maxB * 5;
+      const npcBonus = game.currentNpcCount * 20;
+      const awarenessBonus = Math.round(game.currentAwarenessAmount * 100);
+      const speedBonus = Math.round(game.settings.speedMultiplier * 80);
+      const playerRatioBonus = Math.round((1.6 - game.settings.playerNpcSpeedRatio) * 100);
+      return base + levelBonus + rangeBonus + numberBonus + npcBonus + awarenessBonus + speedBonus + playerRatioBonus;
+    }
+
+    function updateHud() {
+      levelHud.textContent = `Level ${game.level}`;
+      scoreHud.textContent = `Score ${game.score}`;
+      equationHud.textContent = formatEquation(game.equation);
+    }
+
+    let toastTimer = 0;
+    function showToast(message, duration = 1400) {
+      toast.textContent = message;
+      toast.classList.add("visible");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("visible"), duration);
+    }
+
+    function updatePlayer(dt) {
+      let sx = 0;
+      let sy = 0;
+      if (keys.has("arrowleft") || keys.has("a")) sx -= 1;
+      if (keys.has("arrowright") || keys.has("d")) sx += 1;
+      if (keys.has("arrowup") || keys.has("w")) sy -= 1;
+      if (keys.has("arrowdown") || keys.has("s")) sy += 1;
+
+      const world = normalize(sx + sy, sy - sx);
+      game.player.vx = world.x * game.player.speed;
+      game.player.vy = world.y * game.player.speed;
+      moveCharacter(game.player, dt);
+    }
+
+    function findAwarenessTarget(npc, characters) {
+      if (npc.awarenessRadius <= 0) return null;
+      let closest = null;
+      let closestDistance = Infinity;
+      for (const other of characters) {
+        if (other === npc) continue;
+        const d = distance(npc, other);
+        if (d < npc.awarenessRadius && d < closestDistance) {
+          closest = other;
+          closestDistance = d;
+        }
+      }
+      return closest;
+    }
+
+    function getNpcMode(npc) {
+      const t = (game.timeSeconds + npc.phase) % npc.wavelength;
+      return t < npc.wavelength / 2 ? "attract" : "repel";
+    }
+
+    function updateNpc(npc, characters, dt) {
+      const target = findAwarenessTarget(npc, characters);
+      if (target) {
+        const mode = getNpcMode(npc);
+        const dx = target.x - npc.x;
+        const dy = target.y - npc.y;
+        const dir = Math.hypot(dx, dy) < 0.08
+          ? fallbackDirection(npc.phase + npc.spriteIndex + 1)
+          : normalize(dx, dy);
+        const sign = mode === "attract" ? 1 : -1;
+        npc.vx = dir.x * npc.speed * sign;
+        npc.vy = dir.y * npc.speed * sign;
+      } else {
+        npc.wanderTimer -= dt;
+        if (npc.wanderTimer <= 0) {
+          npc.wanderTimer = randomRange(0.8, 2.4);
+          npc.wanderAngle += randomRange(-1.8, 1.8);
+        }
+        npc.vx = Math.cos(npc.wanderAngle) * npc.speed * 0.72;
+        npc.vy = Math.sin(npc.wanderAngle) * npc.speed * 0.72;
+      }
+
+      moveCharacter(npc, dt);
+    }
+
+    function moveCharacter(character, dt) {
+      character.x += character.vx * dt;
+      character.y += character.vy * dt;
+
+      if (character.x < 0.45 || character.x > ROOM.width - 0.45) {
+        character.x = clamp(character.x, 0.45, ROOM.width - 0.45);
+        character.vx *= -0.4;
+        character.wanderAngle = Math.PI - character.wanderAngle;
+      }
+      if (character.y < 0.45 || character.y > ROOM.height - 0.45) {
+        character.y = clamp(character.y, 0.45, ROOM.height - 0.45);
+        character.vy *= -0.4;
+        character.wanderAngle = -character.wanderAngle;
+      }
+    }
+
+    function separateOverlaps(characters) {
+      for (let pass = 0; pass < 2; pass += 1) {
+        for (let i = 0; i < characters.length; i += 1) {
+          for (let j = i + 1; j < characters.length; j += 1) {
+            const a = characters[i];
+            const b = characters[j];
+            const minDistance = a.radius + b.radius + 0.08;
+            let dx = b.x - a.x;
+            let dy = b.y - a.y;
+            let d = Math.hypot(dx, dy);
+
+            if (d >= minDistance) continue;
+
+            if (d < 0.0001) {
+              const dir = fallbackDirection(i * 11 + j * 17 + 3);
+              dx = dir.x;
+              dy = dir.y;
+              d = 1;
+            }
+
+            const overlap = (minDistance - d) / 2;
+            const nx = dx / d;
+            const ny = dy / d;
+            a.x = clamp(a.x - nx * overlap, 0.45, ROOM.width - 0.45);
+            a.y = clamp(a.y - ny * overlap, 0.45, ROOM.height - 0.45);
+            b.x = clamp(b.x + nx * overlap, 0.45, ROOM.width - 0.45);
+            b.y = clamp(b.y + ny * overlap, 0.45, ROOM.height - 0.45);
+          }
+        }
+      }
+    }
+
+    function updateCooldowns(dt) {
+      const characters = [game.player, ...game.npcs];
+      for (const character of characters) {
+        character.swapCooldown = Math.max(0, character.swapCooldown - dt);
+      }
+      game.wrongExitCooldown = Math.max(0, game.wrongExitCooldown - dt);
+      game.swapEffects = game.swapEffects
+        .map((effect) => ({ ...effect, life: effect.life - dt }))
+        .filter((effect) => effect.life > 0);
+    }
+
+    function handleSwaps() {
+      const characters = [game.player, ...game.npcs];
+      for (let i = 0; i < characters.length; i += 1) {
+        for (let j = i + 1; j < characters.length; j += 1) {
+          const a = characters[i];
+          const b = characters[j];
+          const contactKey = a.id < b.id ? `${a.id}:${b.id}` : `${b.id}:${a.id}`;
+          const interactionDistance = Math.max(a.interactionRadius, b.interactionRadius);
+          const d = distance(a, b);
+
+          if (d > interactionDistance + 0.16) {
+            game.activeContacts.delete(contactKey);
+            continue;
+          }
+
+          if (d <= interactionDistance && !game.activeContacts.has(contactKey) && a.swapCooldown <= 0 && b.swapCooldown <= 0) {
+            const temp = a.carriedNumber;
+            a.carriedNumber = b.carriedNumber;
+            b.carriedNumber = temp;
+            a.swapCooldown = 0.75;
+            b.swapCooldown = 0.75;
+            game.activeContacts.add(contactKey);
+            separateOverlaps([a, b]);
+            game.swapEffects.push({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, life: 0.45 });
+          }
+        }
+      }
+    }
+
+    function checkExit() {
+      if (game.levelTransitionTimer > 0) return;
+      if (distance(game.player, EXIT) > EXIT.radius) return;
+      if (game.player.carriedNumber === game.equation.targetNumber) {
+        const points = calculateRoomScore();
+        game.score += points;
+        game.highestLevelReached = Math.max(game.highestLevelReached, game.level);
+        game.levelTransitionTimer = 1.35;
+        updateHud();
+        showToast(`Correct: ${solvedEquation(game.equation)}. +${points} points`, 1250);
+      } else if (game.wrongExitCooldown <= 0) {
+        game.wrongExitCooldown = 1.2;
+        showToast(`Wrong number. You are carrying ${game.player.carriedNumber}.`, 1200);
+      }
+    }
+
+    function updateGame(dt) {
+      if (!game.player || game.screen !== "game") return;
+      game.timeSeconds += dt;
+
+      if (game.levelTransitionTimer > 0) {
+        game.levelTransitionTimer -= dt;
+        if (game.levelTransitionTimer <= 0) {
+          game.level += 1;
+          game.highestLevelReached = Math.max(game.highestLevelReached, game.level);
+          generateLevel();
+          showToast("Next room.", 900);
+        }
+      }
+
+      updateCooldowns(dt);
+      updatePlayer(dt);
+      const characters = [game.player, ...game.npcs];
+      for (const npc of game.npcs) updateNpc(npc, characters, dt);
+      separateOverlaps(characters);
+      handleSwaps();
+      checkExit();
+    }
+
+    function drawTile(x, y, fill) {
+      const p = project(x, y);
+      const tw = tileWidth();
+      const th = tileHeight();
+      const hw = tw / 2;
+      const hh = th / 2;
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      ctx.lineTo(p.x + hw, p.y + hh);
+      ctx.lineTo(p.x, p.y + th);
+      ctx.lineTo(p.x - hw, p.y + hh);
+      ctx.closePath();
+      ctx.fillStyle = fill;
+      ctx.fill();
+      ctx.strokeStyle = "#b9d7d1";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    function drawRoom() {
+      for (let y = 0; y < ROOM.height; y += 1) {
+        for (let x = 0; x < ROOM.width; x += 1) {
+          const accent = (x + y) % 5 === 0 ? "#edf8ee" : (x + y) % 3 === 0 ? "#e6f3f7" : "#f7fbf4";
+          drawTile(x, y, accent);
+        }
+      }
+
+      drawBoundary();
+      drawExit();
+    }
+
+    function drawBoundary() {
+      ctx.save();
+      ctx.lineWidth = 8;
+      ctx.lineJoin = "round";
+      ctx.strokeStyle = "#8bcfc1";
+      const corners = [
+        project(0, 0),
+        project(ROOM.width, 0),
+        project(ROOM.width, ROOM.height),
+        project(0, ROOM.height)
+      ];
+      const th = tileHeight();
+      ctx.beginPath();
+      ctx.moveTo(corners[0].x, corners[0].y + th / 2);
+      for (let i = 1; i < corners.length; i += 1) ctx.lineTo(corners[i].x, corners[i].y + th / 2);
+      ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawExit() {
+      const p = project(EXIT.x, EXIT.y);
+      ctx.save();
+      ctx.translate(p.x, p.y + 12);
+      ctx.fillStyle = "rgba(35, 49, 58, 0.16)";
+      ctx.beginPath();
+      ctx.ellipse(0, 30, 44, 15, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (images.exitDoorSign && images.exitDoorSign.ready) {
+        const size = Math.max(160, Math.min(220, tileWidth() * 2.7));
+        ctx.drawImage(images.exitDoorSign, -size / 2, -size + 36, size, size);
+        ctx.restore();
+        return;
+      }
+
+      ctx.fillStyle = "#2f80ed";
+      ctx.strokeStyle = "#155fae";
+      ctx.lineWidth = 4;
+      roundRect(-36, -54, 72, 92, 10);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#f7ffff";
+      roundRect(-22, -38, 44, 64, 7);
+      ctx.fill();
+      ctx.fillStyle = "#ffd166";
+      ctx.beginPath();
+      ctx.moveTo(0, -68);
+      ctx.lineTo(34, -48);
+      ctx.lineTo(0, -28);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawEquationSign() {
+      const p = project(EXIT.x, EXIT.y);
+      ctx.save();
+      if (images.exitDoorSign && images.exitDoorSign.ready) {
+        const size = Math.max(160, Math.min(220, tileWidth() * 2.7));
+        ctx.translate(p.x, p.y + 12 - size + 36);
+        ctx.translate(size * 0.015, size * 0.205);
+        ctx.rotate(0.14);
+        ctx.transform(1, 0, -0.035, 1, 0, 0);
+        ctx.fillStyle = "#156a72";
+        ctx.font = `900 ${Math.max(11, Math.round(size * 0.058))}px Inter, sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(formatEquation(game.equation), 0, 0, size * 0.46);
+        ctx.restore();
+        return;
+      }
+
+      ctx.translate(p.x, p.y - 82);
+      ctx.fillStyle = "#8b6a3d";
+      ctx.fillRect(-24, 38, 7, 44);
+      ctx.fillRect(17, 38, 7, 44);
+      ctx.fillStyle = "#fff8d8";
+      ctx.strokeStyle = "#8b6a3d";
+      ctx.lineWidth = 4;
+      roundRect(-76, -22, 152, 62, 8);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#156a72";
+      ctx.font = "900 20px Inter, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(formatEquation(game.equation), 0, 9);
+      ctx.restore();
+    }
+
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function drawAwareness(npc) {
+      if (!game.settings.showAwareness) return;
+      if (npc.awarenessRadius <= 0) return;
+      const p = project(npc.x, npc.y);
+      const mode = getNpcMode(npc);
+      const radiusX = npc.awarenessRadius * tileWidth() / 2;
+      const radiusY = npc.awarenessRadius * tileHeight() / 2;
+      ctx.save();
+      ctx.globalAlpha = 0.18;
+      ctx.strokeStyle = mode === "attract" ? "#2f80ed" : "#ee675c";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y + 18, radiusX, radiusY, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawCharacter(character) {
+      const p = project(character.x, character.y);
+      const isPlayer = character.type === "player";
+      const image = isPlayer ? images.player : images.npcs[character.spriteIndex % images.npcs.length];
+      const size = isPlayer ? 82 : 74;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.fillStyle = "rgba(35, 49, 58, 0.20)";
+      ctx.beginPath();
+      ctx.ellipse(0, 24, 27, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      if (image && image.ready) {
+        ctx.drawImage(image, -size / 2, -size + 28, size, size);
+      } else {
+        drawFallbackCharacter(isPlayer);
+      }
+
+      drawNumberBadge(character.carriedNumber, isPlayer);
+      ctx.restore();
+    }
+
+    function drawFallbackCharacter(isPlayer) {
+      ctx.fillStyle = isPlayer ? "#20c7d9" : "#f08a3c";
+      ctx.strokeStyle = "#24515a";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(0, -20, 28, 36, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#24333c";
+      ctx.beginPath();
+      ctx.arc(-9, -30, 3, 0, Math.PI * 2);
+      ctx.arc(9, -30, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawNumberBadge(number, isPlayer) {
+      ctx.save();
+      ctx.translate(0, -64);
+      ctx.fillStyle = isPlayer ? "#fff8d8" : "#ffffff";
+      ctx.strokeStyle = isPlayer ? "#20a6b5" : "#567078";
+      ctx.lineWidth = 3;
+      roundRect(-26, -17, 52, 34, 8);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#23313a";
+      ctx.font = "900 19px Inter, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(String(number), 0, 1);
+      ctx.restore();
+    }
+
+    function drawSwapEffects() {
+      for (const effect of game.swapEffects) {
+        const p = project(effect.x, effect.y);
+        const alpha = clamp(effect.life / 0.45, 0, 1);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(p.x, p.y - 40);
+        ctx.strokeStyle = "#f1b82d";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(0, 0, 18, -0.2, Math.PI * 1.2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(17, -8);
+        ctx.lineTo(27, -4);
+        ctx.lineTo(19, 4);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    function renderGame() {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      drawRoom();
+
+      for (const npc of game.npcs) drawAwareness(npc);
+
+      const characters = [game.player, ...game.npcs].filter(Boolean);
+      characters.sort((a, b) => (a.x + a.y) - (b.x + b.y));
+      for (const character of characters) drawCharacter(character);
+
+      drawSwapEffects();
+      drawEquationSign();
+    }
+
+    function loop(timestamp) {
+      const dt = Math.min(0.05, ((timestamp - game.lastTimestamp) || 0) / 1000);
+      game.lastTimestamp = timestamp;
+      if (game.running) {
+        updateGame(dt);
+        renderGame();
+      }
+      requestAnimationFrame(loop);
+    }
+
+    function quitToMenu() {
+      maybeRecordScore();
+      game.running = false;
+      showScreen("splash");
+    }
+
+    startButton.addEventListener("click", startRun);
+    settingsStartButton.addEventListener("click", startRun);
+    settingsButton.addEventListener("click", () => showScreen("settings"));
+    settingsBackButton.addEventListener("click", () => {
+      readSettingsForm();
+      showScreen("splash");
+    });
+    quitButton.addEventListener("click", quitToMenu);
+
+    npcCountInput.addEventListener("change", readSettingsForm);
+    roomSizeInput.addEventListener("change", readSettingsForm);
+    awarenessInput.addEventListener("input", () => {
+      awarenessValue.textContent = Number(awarenessInput.value).toFixed(2);
+    });
+    awarenessInput.addEventListener("change", readSettingsForm);
+    speedInput.addEventListener("input", () => {
+      speedValue.textContent = `${Number(speedInput.value).toFixed(2)}x`;
+    });
+    speedInput.addEventListener("change", readSettingsForm);
+    playerNpcSpeedRatioInput.addEventListener("input", () => {
+      playerNpcSpeedRatioValue.textContent = `${Number(playerNpcSpeedRatioInput.value).toFixed(2)}x`;
+    });
+    playerNpcSpeedRatioInput.addEventListener("change", readSettingsForm);
+    showAwarenessInput.addEventListener("change", readSettingsForm);
+    bValueChecks.addEventListener("change", readSettingsForm);
+
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+      if (game.screen === "game") renderGame();
+    });
+
+    window.addEventListener("keydown", (event) => {
+      const key = event.key.toLowerCase();
+      if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"].includes(key)) {
+        keys.add(key);
+        event.preventDefault();
+      }
+    });
+
+    window.addEventListener("keyup", (event) => {
+      keys.delete(event.key.toLowerCase());
+    });
+
+    window.addEventListener("beforeunload", () => {
+      if (game.score > 0) maybeRecordScore();
+    });
+
+    applyRoomSize();
+    buildSettingsForm();
+    loadSprites();
+    renderLeaderboard();
+    resizeCanvas();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
