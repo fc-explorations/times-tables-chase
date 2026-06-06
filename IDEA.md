@@ -271,6 +271,8 @@ The reaction is either:
 - Attraction: move toward the detected character.
 - Repulsion: move away from the detected character.
 
+NPCs should also have a short-range repulsive force between each other. This separation force should become stronger than attraction at close distances, so NPCs can react to each other without clumping into a stable stack.
+
 This creates moving number targets that the player must chase, avoid, predict, or manipulate.
 
 ## NPC Awareness
@@ -430,6 +432,23 @@ npc.velocity = randomWanderVelocity;
 ```
 
 NPCs should still respect room bounds.
+
+After choosing a target velocity from attraction, repulsion, or waypoint wandering, apply NPC-to-NPC separation:
+
+```js
+for (const otherNpc of npcs) {
+  if (otherNpc === npc) continue;
+
+  const distance = distanceBetween(npc, otherNpc);
+  if (distance < separationRadius) {
+    const closeness = 1 - distance / separationRadius;
+    const strength = closeness * closeness * npc.speed * 2.2;
+    npc.velocityTarget += directionAwayFrom(otherNpc) * strength;
+  }
+}
+```
+
+The separation force should be local and nonlinear. It should be weak when NPCs are near but not touching, and strong when they are very close.
 
 ## Player Controls
 
