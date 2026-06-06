@@ -91,6 +91,78 @@
         #dff1ee;
     }
 
+    .splash-screen {
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      background: #bdeee9;
+    }
+
+    .splash-art {
+      position: relative;
+      width: min(100vw, calc(100vh * 1672 / 941));
+      aspect-ratio: 1672 / 941;
+    }
+
+    .splash-art img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .splash-hit {
+      position: absolute;
+      min-height: 0;
+      border: 0;
+      border-radius: 16px;
+      padding: 0;
+      background: transparent;
+      box-shadow: none;
+      color: transparent;
+      cursor: pointer;
+    }
+
+    .splash-hit:hover,
+    .splash-hit:active {
+      filter: none;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .splash-hit:focus-visible {
+      outline: 3px solid rgba(47, 128, 237, 0.8);
+      outline-offset: 4px;
+    }
+
+    .splash-hit.start {
+      left: 7.1%;
+      top: 73.2%;
+      width: 18.4%;
+      height: 13.1%;
+    }
+
+    .splash-hit.settings {
+      left: 28.2%;
+      top: 73.2%;
+      width: 17.7%;
+      height: 13.1%;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     .menu-panel {
       width: min(920px, 100%);
       max-height: calc(100vh - 56px);
@@ -100,6 +172,10 @@
       padding: 28px;
       background: var(--panel);
       box-shadow: 0 18px 50px var(--shadow);
+    }
+
+    #settingsScreen .menu-panel {
+      padding-bottom: 56px;
     }
 
     .title-row {
@@ -281,7 +357,7 @@
 
     #gameScreen {
       display: none;
-      background: #dff1ee;
+      background: #dff1ee url("assets/background/bk.png") center / 100% 100% no-repeat;
     }
 
     #gameScreen.active {
@@ -292,25 +368,27 @@
       display: block;
       width: 100vw;
       height: 100vh;
-      background:
-        linear-gradient(180deg, #eaf8f5, #d7ece8);
+      background: transparent;
     }
 
     .hud {
       position: fixed;
-      top: 14px;
-      left: 14px;
-      right: 14px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 14px;
+      top: 6.2%;
+      left: 31.2%;
+      width: 37.6%;
+      min-height: 22.5%;
+      display: grid;
+      grid-template-rows: auto auto;
+      align-content: center;
+      justify-items: center;
+      gap: 10px;
       pointer-events: none;
     }
 
     .hud-group {
       display: flex;
       flex-wrap: wrap;
+      justify-content: center;
       gap: 8px;
       pointer-events: auto;
     }
@@ -369,28 +447,25 @@
       }
 
       .hud {
-        flex-direction: column;
+        top: 6%;
+        left: 27%;
+        width: 46%;
+        min-height: 23%;
       }
     }
   </style>
 </head>
 <body>
-  <section id="splashScreen" class="screen menu-screen active">
-    <div class="menu-panel">
-      <div class="title-row">
-        <div>
-          <h1>Times Table Chase</h1>
-          <p class="subtitle">Swap numbers with wandering classmates, solve the equation, and reach the exit with the right answer.</p>
-        </div>
-        <div class="button-row">
-          <button id="startButton" type="button">Start</button>
-          <button id="settingsButton" class="secondary" type="button">Settings</button>
-        </div>
-      </div>
-      <div class="leaderboard">
-        <h2>Leaderboard</h2>
-        <div id="leaderboardContent"></div>
-      </div>
+  <section id="splashScreen" class="screen splash-screen active">
+    <div class="splash-art" aria-label="Times Table Chase splash screen">
+      <img src="assets/splash/splash_screen.png" alt="">
+      <button id="startButton" class="splash-hit start" type="button" aria-label="Start game">
+        <span class="sr-only">Start</span>
+      </button>
+      <button id="settingsButton" class="splash-hit settings" type="button" aria-label="Open settings">
+        <span class="sr-only">Settings</span>
+      </button>
+      <div id="leaderboardContent" hidden></div>
     </div>
   </section>
 
@@ -410,6 +485,12 @@
           <label for="roomSizeInput">Room size</label>
           <p class="hint">Number of tiles per side. 10 means a 10 x 10 room.</p>
           <input id="roomSizeInput" type="number" min="6" max="18" step="1">
+        </div>
+
+        <div class="setting-card">
+          <label for="wallCountInput">Walls</label>
+          <p class="hint">Random short walls block movement. More walls award more points.</p>
+          <input id="wallCountInput" type="number" min="0" max="12" step="1">
         </div>
 
         <div class="setting-card">
@@ -436,6 +517,15 @@
           <label class="toggle-row">
             <input id="showAwarenessInput" type="checkbox">
             <span>Visible</span>
+          </label>
+        </div>
+
+        <div class="setting-card">
+          <label for="axisMovementInput">Movement along axes</label>
+          <p class="hint">Use room tile axes instead of screen left, right, up, and down.</p>
+          <label class="toggle-row">
+            <input id="axisMovementInput" type="checkbox">
+            <span>Axis mode</span>
           </label>
         </div>
 
@@ -496,11 +586,13 @@
       allowedBValues: [2, 3, 4, 5],
       awarenessAmount: 0.5,
       roomSize: 10,
+      wallCount: 3,
       speedMultiplier: 1,
       playerNpcSpeedRatio: 1,
       squareStateMinSeconds: 5,
       squareStateMaxSeconds: 12,
-      showAwareness: true
+      showAwareness: true,
+      axisMovement: true
     };
 
     const ROOM = {
@@ -521,7 +613,13 @@
         "assets/characters/npc_yellow_idle.png",
         "assets/characters/npc_violet_idle.png"
       ],
-      exitDoorSign: "assets/room/exit_door_sign.png"
+      exitDoorSign: "assets/room/exit_door_sign.png",
+      walls: {
+        x2: "assets/room/wall_x_2.png",
+        x4: "assets/room/wall_x_4.png",
+        y2: "assets/room/wall_y_2.png",
+        y4: "assets/room/wall_y_4.png"
+      }
     };
 
     const screens = {
@@ -539,6 +637,7 @@
     const quitButton = document.getElementById("quitButton");
     const npcCountInput = document.getElementById("npcCountInput");
     const roomSizeInput = document.getElementById("roomSizeInput");
+    const wallCountInput = document.getElementById("wallCountInput");
     const awarenessInput = document.getElementById("awarenessInput");
     const awarenessValue = document.getElementById("awarenessValue");
     const speedInput = document.getElementById("speedInput");
@@ -549,6 +648,7 @@
     const squareStateMaxInput = document.getElementById("squareStateMaxInput");
     const squareStateDurationValue = document.getElementById("squareStateDurationValue");
     const showAwarenessInput = document.getElementById("showAwarenessInput");
+    const axisMovementInput = document.getElementById("axisMovementInput");
     const bValueChecks = document.getElementById("bValueChecks");
     const leaderboardContent = document.getElementById("leaderboardContent");
     const levelHud = document.getElementById("levelHud");
@@ -560,7 +660,8 @@
     const images = {
       player: null,
       npcs: [],
-      exitDoorSign: null
+      exitDoorSign: null,
+      walls: {}
     };
 
     const game = {
@@ -581,6 +682,7 @@
       currentAwarenessAmount: 0,
       player: null,
       npcs: [],
+      walls: [],
       swapEffects: [],
       activeContacts: new Set(),
       nextCharacterId: 1,
@@ -649,11 +751,13 @@
           allowedBValues: allowedBValues.length ? allowedBValues : [...DEFAULT_SETTINGS.allowedBValues],
           awarenessAmount: clamp(Number(stored.awarenessAmount) || 0, 0, 1),
           roomSize: clamp(Math.floor(Number(stored.roomSize) || DEFAULT_SETTINGS.roomSize), 6, 18),
+          wallCount: clamp(Math.floor(Number.isFinite(Number(stored.wallCount)) ? Number(stored.wallCount) : DEFAULT_SETTINGS.wallCount), 0, 12),
           speedMultiplier: clamp(Number(stored.speedMultiplier) || DEFAULT_SETTINGS.speedMultiplier, 0.75, 1.75),
           playerNpcSpeedRatio: clamp(Number(stored.playerNpcSpeedRatio) || DEFAULT_SETTINGS.playerNpcSpeedRatio, 0.5, 1.5),
           squareStateMinSeconds: squareStateRange.min,
           squareStateMaxSeconds: squareStateRange.max,
-          showAwareness: typeof stored.showAwareness === "boolean" ? stored.showAwareness : DEFAULT_SETTINGS.showAwareness
+          showAwareness: typeof stored.showAwareness === "boolean" ? stored.showAwareness : DEFAULT_SETTINGS.showAwareness,
+          axisMovement: typeof stored.axisMovement === "boolean" ? stored.axisMovement : DEFAULT_SETTINGS.axisMovement
         };
       } catch {
         return { ...DEFAULT_SETTINGS };
@@ -752,6 +856,7 @@
     function syncSettingsForm() {
       npcCountInput.value = game.settings.npcCount;
       roomSizeInput.value = game.settings.roomSize;
+      wallCountInput.value = game.settings.wallCount;
       awarenessInput.value = game.settings.awarenessAmount;
       awarenessValue.textContent = Number(game.settings.awarenessAmount).toFixed(2);
       speedInput.value = game.settings.speedMultiplier;
@@ -762,6 +867,7 @@
       squareStateMaxInput.value = game.settings.squareStateMaxSeconds;
       updateSquareStateDurationLabel();
       showAwarenessInput.checked = game.settings.showAwareness;
+      axisMovementInput.checked = game.settings.axisMovement;
       for (const input of bValueChecks.querySelectorAll("input")) {
         input.checked = game.settings.allowedBValues.includes(Number(input.value));
       }
@@ -773,13 +879,15 @@
       game.settings = {
         npcCount: clamp(Math.floor(Number(npcCountInput.value) || DEFAULT_SETTINGS.npcCount), 1, 14),
         roomSize: clamp(Math.floor(Number(roomSizeInput.value) || DEFAULT_SETTINGS.roomSize), 6, 18),
+        wallCount: clamp(Math.floor(Number(wallCountInput.value) || 0), 0, 12),
         allowedBValues: selected.length ? selected : [...DEFAULT_SETTINGS.allowedBValues],
         awarenessAmount: clamp(Number(awarenessInput.value), 0, 1),
         speedMultiplier: clamp(Number(speedInput.value) || DEFAULT_SETTINGS.speedMultiplier, 0.75, 1.75),
         playerNpcSpeedRatio: clamp(Number(playerNpcSpeedRatioInput.value) || DEFAULT_SETTINGS.playerNpcSpeedRatio, 0.5, 1.5),
         squareStateMinSeconds: squareStateRange.min,
         squareStateMaxSeconds: squareStateRange.max,
-        showAwareness: showAwarenessInput.checked
+        showAwareness: showAwarenessInput.checked,
+        axisMovement: axisMovementInput.checked
       };
       applyRoomSize();
       saveSettings();
@@ -809,6 +917,9 @@
       images.player = loadImage(SPRITE_PATHS.player);
       images.npcs = SPRITE_PATHS.npcs.map(loadImage);
       images.exitDoorSign = loadImage(SPRITE_PATHS.exitDoorSign);
+      images.walls = Object.fromEntries(
+        Object.entries(SPRITE_PATHS.walls).map(([key, path]) => [key, loadImage(path)])
+      );
     }
 
     function resizeCanvas() {
@@ -820,7 +931,7 @@
 
     function tileWidth() {
       const horizontalFit = Math.max(48, (window.innerWidth - 96) / ((ROOM.width + ROOM.height) / 2));
-      const verticalFit = Math.max(48, (window.innerHeight - 170) / (ROOM.height / 2));
+      const verticalFit = Math.max(48, (window.innerHeight - window.innerHeight * 0.35 - 36) / (ROOM.height / 2));
       return Math.min(ROOM.tileWidth, horizontalFit, verticalFit);
     }
 
@@ -833,7 +944,9 @@
       const th = tileHeight();
       const centerX = window.innerWidth / 2;
       const floorHeight = ROOM.height * th;
-      const centerY = Math.max(92, Math.min(170, (window.innerHeight - floorHeight) / 2 + 18));
+      const lowerPlayTop = window.innerHeight * 0.36;
+      const centeredPlayTop = (window.innerHeight - floorHeight) / 2 + window.innerHeight * 0.17;
+      const centerY = Math.max(lowerPlayTop, centeredPlayTop);
       return {
         x: centerX + (x - y) * tw / 2,
         y: centerY + (x + y) * th / 2
@@ -922,7 +1035,7 @@
       for (let attempts = 0; attempts < 100; attempts += 1) {
         const x = randomRange(margin, ROOM.width - margin);
         const y = randomRange(margin, ROOM.height - margin);
-        if (distance({ x, y }, PLAYER_START) > 2 && distance({ x, y }, EXIT) > 2) {
+        if (distance({ x, y }, PLAYER_START) > 2 && distance({ x, y }, EXIT) > 2 && !isPointBlockedByWall({ x, y }, 0.75)) {
           return { x, y };
         }
       }
@@ -933,10 +1046,76 @@
     }
 
     function randomWaypoint() {
+      for (let attempts = 0; attempts < 50; attempts += 1) {
+        const point = {
+          x: randomRange(0.9, ROOM.width - 0.9),
+          y: randomRange(0.9, ROOM.height - 0.9)
+        };
+        if (!isPointBlockedByWall(point, 0.7)) return point;
+      }
       return {
         x: randomRange(0.9, ROOM.width - 0.9),
         y: randomRange(0.9, ROOM.height - 0.9)
       };
+    }
+
+    function wallKey(wall) {
+      return `${wall.axis}${wall.length}`;
+    }
+
+    function wallEndpoints(wall) {
+      return wall.axis === "x"
+        ? [{ x: wall.x, y: wall.y }, { x: wall.x + wall.length, y: wall.y }]
+        : [{ x: wall.x, y: wall.y }, { x: wall.x, y: wall.y + wall.length }];
+    }
+
+    function pointToSegmentDistance(point, a, b) {
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const segmentLengthSq = dx * dx + dy * dy;
+      if (segmentLengthSq <= 0.0001) return distance(point, a);
+      const t = clamp(((point.x - a.x) * dx + (point.y - a.y) * dy) / segmentLengthSq, 0, 1);
+      return distance(point, { x: a.x + dx * t, y: a.y + dy * t });
+    }
+
+    function isPointNearWall(point, wall, clearance) {
+      const [a, b] = wallEndpoints(wall);
+      return pointToSegmentDistance(point, a, b) < clearance;
+    }
+
+    function wallsOverlap(a, b) {
+      if (a.axis !== b.axis) return false;
+      if (a.axis === "x") {
+        if (Math.abs(a.y - b.y) > 0.01) return false;
+        return Math.max(a.x, b.x) < Math.min(a.x + a.length, b.x + b.length) + 0.35;
+      }
+      if (Math.abs(a.x - b.x) > 0.01) return false;
+      return Math.max(a.y, b.y) < Math.min(a.y + a.length, b.y + b.length) + 0.35;
+    }
+
+    function generateWalls() {
+      const walls = [];
+      const requested = clamp(Math.floor(Number(game.settings.wallCount) || 0), 0, 12);
+      const attemptsLimit = Math.max(80, requested * 90);
+      for (let attempts = 0; walls.length < requested && attempts < attemptsLimit; attempts += 1) {
+        const axis = Math.random() < 0.5 ? "x" : "y";
+        const length = Math.random() < 0.5 ? 2 : 4;
+        if (axis === "x" && ROOM.width - length - 1 < 1) continue;
+        if (axis === "y" && ROOM.height - length - 1 < 1) continue;
+        const wall = axis === "x"
+          ? { axis, length, x: randomInt(1, ROOM.width - length - 1), y: randomInt(1, ROOM.height - 1) }
+          : { axis, length, x: randomInt(1, ROOM.width - 1), y: randomInt(1, ROOM.height - length - 1) };
+
+        const tooCloseToEntrance = isPointNearWall(PLAYER_START, wall, 1.3);
+        const tooCloseToExit = isPointNearWall(EXIT, wall, 1.4);
+        const overlapsExisting = walls.some((existing) => wallsOverlap(existing, wall));
+        if (!tooCloseToEntrance && !tooCloseToExit && !overlapsExisting) walls.push(wall);
+      }
+      return walls;
+    }
+
+    function isPointBlockedByWall(point, clearance = 0.52) {
+      return game.walls.some((wall) => isPointNearWall(point, wall, clearance));
     }
 
     function startRun() {
@@ -961,6 +1140,7 @@
       game.activeContacts.clear();
       game.currentNpcCount = getLevelNpcCount(game.settings, game.level);
       game.currentAwarenessAmount = getLevelAwarenessAmount(game.settings, game.level);
+      game.walls = generateWalls();
       const awarenessRadius = getAwarenessRadius(game.currentAwarenessAmount, ROOM);
       const distractors = makeDistractorNumbers();
       const playerNumber = choice(distractors.length ? distractors : game.settings.allowedBValues);
@@ -987,10 +1167,11 @@
       const maxB = Math.max(...game.settings.allowedBValues);
       const numberBonus = game.equation.a * 2 + game.equation.b * 3 + Math.floor(game.equation.c / 2) + maxB * 5;
       const npcBonus = game.currentNpcCount * 20;
+      const wallBonus = game.walls.length * 35;
       const awarenessBonus = Math.round(game.currentAwarenessAmount * 100);
       const speedBonus = Math.round(game.settings.speedMultiplier * 80);
       const playerRatioBonus = Math.round((1.6 - game.settings.playerNpcSpeedRatio) * 100);
-      return base + levelBonus + rangeBonus + numberBonus + npcBonus + awarenessBonus + speedBonus + playerRatioBonus;
+      return base + levelBonus + rangeBonus + numberBonus + npcBonus + wallBonus + awarenessBonus + speedBonus + playerRatioBonus;
     }
 
     function updateHud() {
@@ -1015,7 +1196,9 @@
       if (keys.has("arrowup") || keys.has("w")) sy -= 1;
       if (keys.has("arrowdown") || keys.has("s")) sy += 1;
 
-      const world = normalize(sx + sy, sy - sx);
+      const world = game.settings.axisMovement
+        ? normalize(sx, sy)
+        : normalize(sx + sy, sy - sx);
       game.player.targetVx = world.x * game.player.speed;
       game.player.targetVy = world.y * game.player.speed;
       moveCharacter(game.player, dt);
@@ -1117,7 +1300,49 @@
       npc.targetVy = dir.y * npc.speed * 0.75;
     }
 
+    function resetNpcPath(character) {
+      if (character.type !== "npc") return;
+      character.waypoint = randomWaypoint();
+      character.lastProgressDistance = Infinity;
+      character.stuckTimer = 0;
+    }
+
+    function resolveWallCollision(character, oldX, oldY) {
+      const radius = character.radius + 0.08;
+      for (const wall of game.walls) {
+        if (wall.axis === "x") {
+          const withinSpan = character.x >= wall.x - radius && character.x <= wall.x + wall.length + radius;
+          const currentGap = character.y - wall.y;
+          const oldGap = oldY - wall.y;
+          const crossed = oldGap * currentGap <= 0 && Math.abs(oldGap) > 0.001;
+          const tooClose = Math.abs(currentGap) < radius;
+          if (withinSpan && (crossed || tooClose)) {
+            const side = Math.abs(oldGap) > 0.001 ? Math.sign(oldGap) : (currentGap < 0 ? -1 : 1);
+            character.y = wall.y + side * radius;
+            character.vy *= -0.2;
+            character.targetVy *= -0.2;
+            resetNpcPath(character);
+          }
+        } else {
+          const withinSpan = character.y >= wall.y - radius && character.y <= wall.y + wall.length + radius;
+          const currentGap = character.x - wall.x;
+          const oldGap = oldX - wall.x;
+          const crossed = oldGap * currentGap <= 0 && Math.abs(oldGap) > 0.001;
+          const tooClose = Math.abs(currentGap) < radius;
+          if (withinSpan && (crossed || tooClose)) {
+            const side = Math.abs(oldGap) > 0.001 ? Math.sign(oldGap) : (currentGap < 0 ? -1 : 1);
+            character.x = wall.x + side * radius;
+            character.vx *= -0.2;
+            character.targetVx *= -0.2;
+            resetNpcPath(character);
+          }
+        }
+      }
+    }
+
     function moveCharacter(character, dt) {
+      const oldX = character.x;
+      const oldY = character.y;
       const blend = 1 - Math.exp(-character.acceleration * dt);
       character.vx += (character.targetVx - character.vx) * blend;
       character.vy += (character.targetVy - character.vy) * blend;
@@ -1128,22 +1353,15 @@
         character.x = clamp(character.x, 0.45, ROOM.width - 0.45);
         character.vx *= -0.4;
         character.targetVx *= -0.4;
-        if (character.type === "npc") {
-          character.waypoint = randomWaypoint();
-          character.lastProgressDistance = Infinity;
-          character.stuckTimer = 0;
-        }
+        resetNpcPath(character);
       }
       if (character.y < 0.45 || character.y > ROOM.height - 0.45) {
         character.y = clamp(character.y, 0.45, ROOM.height - 0.45);
         character.vy *= -0.4;
         character.targetVy *= -0.4;
-        if (character.type === "npc") {
-          character.waypoint = randomWaypoint();
-          character.lastProgressDistance = Infinity;
-          character.stuckTimer = 0;
-        }
+        resetNpcPath(character);
       }
+      resolveWallCollision(character, oldX, oldY);
     }
 
     function separateOverlaps(characters) {
@@ -1291,6 +1509,7 @@
       }
 
       drawBoundary();
+      drawWalls();
       drawExit();
     }
 
@@ -1309,6 +1528,92 @@
       ctx.moveTo(corners[0].x, corners[0].y);
       for (let i = 1; i < corners.length; i += 1) ctx.lineTo(corners[i].x, corners[i].y);
       ctx.closePath();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawWalls() {
+      for (const wall of game.walls) drawWall(wall);
+    }
+
+    function drawWall(wall) {
+      const [a, b] = wallEndpoints(wall);
+      const start = project(a.x, a.y);
+      const end = project(b.x, b.y);
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const length = Math.hypot(dx, dy);
+      if (length < 0.001) return;
+
+      const nx = -dy / length;
+      const ny = dx / length;
+      const thickness = Math.max(9, tileHeight() * 0.22);
+      const height = Math.max(13, tileHeight() * 0.34);
+      const half = thickness / 2;
+
+      const topA = { x: start.x + nx * half, y: start.y + ny * half };
+      const topB = { x: end.x + nx * half, y: end.y + ny * half };
+      const topC = { x: end.x - nx * half, y: end.y - ny * half };
+      const topD = { x: start.x - nx * half, y: start.y - ny * half };
+      const bottomC = { x: topC.x, y: topC.y + height };
+      const bottomD = { x: topD.x, y: topD.y + height };
+      const bottomB = { x: topB.x, y: topB.y + height * 0.45 };
+
+      ctx.save();
+      ctx.fillStyle = "rgba(35, 49, 58, 0.10)";
+      ctx.beginPath();
+      ctx.moveTo(topD.x + 3, topD.y + height + 3);
+      ctx.lineTo(topC.x + 3, topC.y + height + 3);
+      ctx.lineTo(topB.x + 5, topB.y + height + 5);
+      ctx.lineTo(topA.x + 5, topA.y + height + 5);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "#52cab5";
+      ctx.beginPath();
+      ctx.moveTo(topD.x, topD.y);
+      ctx.lineTo(topC.x, topC.y);
+      ctx.lineTo(bottomC.x, bottomC.y);
+      ctx.lineTo(bottomD.x, bottomD.y);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "#41b8a9";
+      ctx.beginPath();
+      ctx.moveTo(topB.x, topB.y);
+      ctx.lineTo(topC.x, topC.y);
+      ctx.lineTo(bottomC.x, bottomC.y);
+      ctx.lineTo(bottomB.x, bottomB.y);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "#c9fff5";
+      ctx.beginPath();
+      ctx.moveTo(topA.x, topA.y);
+      ctx.lineTo(topB.x, topB.y);
+      ctx.lineTo(topC.x, topC.y);
+      ctx.lineTo(topD.x, topD.y);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = "#0f6969";
+      ctx.lineWidth = 2;
+      ctx.lineJoin = "round";
+      ctx.beginPath();
+      ctx.moveTo(topA.x, topA.y);
+      ctx.lineTo(topB.x, topB.y);
+      ctx.lineTo(topC.x, topC.y);
+      ctx.lineTo(bottomC.x, bottomC.y);
+      ctx.lineTo(bottomD.x, bottomD.y);
+      ctx.lineTo(topD.x, topD.y);
+      ctx.closePath();
+      ctx.stroke();
+
+      ctx.strokeStyle = "#ecfff9";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(start.x, start.y - 1);
+      ctx.lineTo(end.x, end.y - 1);
       ctx.stroke();
       ctx.restore();
     }
@@ -1354,14 +1659,14 @@
       if (images.exitDoorSign && images.exitDoorSign.ready) {
         const size = Math.max(160, Math.min(220, tileWidth() * 2.7));
         ctx.translate(p.x, p.y + 12 - size + 36);
-        ctx.translate(size * -0.045, size * 0.242);
-        ctx.rotate(0.29);
-        ctx.transform(1, 0, -0.035, 1, 0, 0);
+        ctx.translate(size * -0.01, size * 0.205);
+        ctx.rotate(0.32);
+        ctx.transform(1, 0, -0.04, 1, 0, 0);
         ctx.fillStyle = "#156a72";
-        ctx.font = `900 ${Math.max(11, Math.round(size * 0.058))}px Inter, sans-serif`;
+        ctx.font = `900 ${Math.max(11, Math.round(size * 0.052))}px Inter, sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(formatEquation(game.equation), 0, 0, size * 0.46);
+        ctx.fillText(formatEquation(game.equation), 0, 0, size * 0.5);
         ctx.restore();
         return;
       }
@@ -1532,6 +1837,7 @@
 
     npcCountInput.addEventListener("change", readSettingsForm);
     roomSizeInput.addEventListener("change", readSettingsForm);
+    wallCountInput.addEventListener("change", readSettingsForm);
     awarenessInput.addEventListener("input", () => {
       awarenessValue.textContent = Number(awarenessInput.value).toFixed(2);
     });
@@ -1549,6 +1855,7 @@
     squareStateMinInput.addEventListener("change", readSettingsForm);
     squareStateMaxInput.addEventListener("change", readSettingsForm);
     showAwarenessInput.addEventListener("change", readSettingsForm);
+    axisMovementInput.addEventListener("change", readSettingsForm);
     bValueChecks.addEventListener("change", readSettingsForm);
 
     window.addEventListener("resize", () => {

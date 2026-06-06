@@ -97,8 +97,10 @@ The game includes settings for:
 - Multiplication table values used for `B`.
 - Starting awareness radius.
 - Room size.
+- Number of random wall obstacles.
 - Overall speed.
 - Player speed relative to NPC speed.
+- Player movement mode: room axes or screen directions.
 - Whether awareness rings are visible.
 
 If the player is slower than the NPCs, the game becomes harder and awards more points.
@@ -113,6 +115,7 @@ Higher scores come from harder conditions:
 - More multiplication tables enabled.
 - Larger multiplication values.
 - More NPCs.
+- More walls.
 - Larger awareness radius.
 - Higher overall speed.
 - Slower player speed relative to NPC speed.

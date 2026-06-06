@@ -204,6 +204,10 @@ Examples:
 tile_floor_default.png
 tile_floor_math_symbol.png
 wall_low_straight.png
+wall_x_2.png
+wall_x_4.png
+wall_y_2.png
+wall_y_4.png
 exit_blue_doorway.png
 sign_chalkboard_blank.png
 ```

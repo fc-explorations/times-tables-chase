@@ -68,10 +68,12 @@ Required settings:
 2. Allowed values for `B` in the multiplication equation.
 3. Starting NPC awareness amount from `0` to `1`.
 4. Room size in number of tiles per side.
-5. Speed multiplier.
-6. Player-vs-NPC speed ratio.
-7. Minimum and maximum square state duration in seconds.
-8. Toggle for showing or hiding NPC awareness radius overlays.
+5. Number of random short walls.
+6. Speed multiplier.
+7. Player-vs-NPC speed ratio.
+8. Minimum and maximum square state duration in seconds.
+9. Toggle for showing or hiding NPC awareness radius overlays.
+10. Toggle for player movement mode: room-axis movement or screen-direction movement.
 
 The settings screen should include:
 
@@ -87,15 +89,24 @@ const settings = {
   allowedBValues: [2, 3, 4, 5],
   awarenessAmount: 0.5,
   roomSize: 10,
+  wallCount: 3,
   speedMultiplier: 1,
   playerNpcSpeedRatio: 1,
   squareStateMinSeconds: 5,
   squareStateMaxSeconds: 12,
-  showAwareness: true
+  showAwareness: true,
+  axisMovement: true
 };
 ```
 
 `settings.roomSize = 10` means the room is `10 x 10` tiles. The room should stay square for the first version.
+
+`settings.wallCount` controls how many short wall obstacles are placed randomly in each room. Walls should be straight segments that occupy tile-grid edges and extend either `2` or `4` tiles in one of the two world-coordinate directions. They block character movement, so players and NPCs must route around wall ends. More walls should increase score rewards.
+
+`settings.axisMovement` controls player input mapping:
+
+- `true`: left/right and up/down move along the room's world-coordinate axes.
+- `false`: left/right and up/down move in screen-oriented directions.
 
 `settings.speedMultiplier` controls the movement speed for the player and NPCs. Higher speed should make the game harder and should increase score rewards.
 
@@ -543,6 +554,7 @@ Difficulty factors that increase score:
 - Larger values in the allowed `B` value set.
 - Larger generated numbers, especially larger `A`, `B`, and `C`.
 - More NPCs in the level.
+- More walls in the room.
 - Larger NPC awareness radius.
 - Higher speed multiplier.
 - Lower player-vs-NPC speed ratio.
@@ -551,7 +563,7 @@ Suggested scoring formula:
 
 ```js
 function calculateRoomScore(game) {
-  const { level, settings, equation, currentNpcCount, currentAwarenessAmount } = game;
+  const { level, settings, equation, currentNpcCount, currentAwarenessAmount, walls } = game;
 
   const base = 100;
   const levelBonus = level * 25;
@@ -559,11 +571,12 @@ function calculateRoomScore(game) {
   const maxB = Math.max(...settings.allowedBValues);
   const numberBonus = equation.a * 2 + equation.b * 3 + Math.floor(equation.c / 2) + maxB * 5;
   const npcBonus = currentNpcCount * 20;
+  const wallBonus = walls.length * 35;
   const awarenessBonus = Math.round(currentAwarenessAmount * 100);
   const speedBonus = Math.round(settings.speedMultiplier * 80);
   const playerRatioBonus = Math.round((1.6 - settings.playerNpcSpeedRatio) * 100);
 
-  return base + levelBonus + rangeBonus + numberBonus + npcBonus + awarenessBonus + speedBonus + playerRatioBonus;
+  return base + levelBonus + rangeBonus + numberBonus + npcBonus + wallBonus + awarenessBonus + speedBonus + playerRatioBonus;
 }
 ```
 
