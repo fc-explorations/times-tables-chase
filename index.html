@@ -1063,48 +1063,18 @@
         updateNpcWaypoint(npc, dt);
       }
 
-      applyNpcSeparation(npc);
       moveCharacter(npc, dt);
     }
 
-    function applyNpcSeparation(npc) {
-      const separationRadius = 1.15;
-      let pushX = 0;
-      let pushY = 0;
+    function forceNpcRepelState(npc) {
+      const repelStart = npc.wavelength / 2 + 0.02;
+      npc.phase = (repelStart - game.timeSeconds + npc.wavelength) % npc.wavelength;
+    }
 
-      for (const other of game.npcs) {
-        if (other === npc) continue;
-
-        let dx = npc.x - other.x;
-        let dy = npc.y - other.y;
-        let d = Math.hypot(dx, dy);
-
-        if (d >= separationRadius) continue;
-
-        if (d < 0.0001) {
-          const dir = fallbackDirection(npc.phase + other.phase + npc.id);
-          dx = dir.x;
-          dy = dir.y;
-          d = 0.0001;
-        }
-
-        const closeness = 1 - d / separationRadius;
-        const strength = closeness * closeness * npc.speed * 2.2;
-        pushX += (dx / d) * strength;
-        pushY += (dy / d) * strength;
-      }
-
-      if (pushX === 0 && pushY === 0) return;
-
-      npc.targetVx += pushX;
-      npc.targetVy += pushY;
-
-      const maxTargetSpeed = npc.speed * 1.8;
-      const targetSpeed = Math.hypot(npc.targetVx, npc.targetVy);
-      if (targetSpeed > maxTargetSpeed) {
-        npc.targetVx = npc.targetVx / targetSpeed * maxTargetSpeed;
-        npc.targetVy = npc.targetVy / targetSpeed * maxTargetSpeed;
-      }
+    function areNpcsMutuallyAttracted(a, b, characters) {
+      if (a.type !== "npc" || b.type !== "npc") return false;
+      if (getNpcMode(a) !== "attract" || getNpcMode(b) !== "attract") return false;
+      return findAwarenessTarget(a, characters) === b && findAwarenessTarget(b, characters) === a;
     }
 
     function updateNpcWaypoint(npc, dt) {
@@ -1244,9 +1214,14 @@
           }
 
           if (d <= interactionDistance && !game.activeContacts.has(contactKey) && a.swapCooldown <= 0 && b.swapCooldown <= 0) {
+            const shouldForceRepel = areNpcsMutuallyAttracted(a, b, characters);
             const temp = a.carriedNumber;
             a.carriedNumber = b.carriedNumber;
             b.carriedNumber = temp;
+            if (shouldForceRepel) {
+              forceNpcRepelState(a);
+              forceNpcRepelState(b);
+            }
             a.swapCooldown = 0.75;
             b.swapCooldown = 0.75;
             game.activeContacts.add(contactKey);
