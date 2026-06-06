@@ -186,8 +186,8 @@ Core character features:
 - Rounded body.
 - Small feet or base.
 - Simple face.
-- Short arms holding or wearing a number badge.
-- Large visible carried number above the head or on a front placard.
+- Short arms with no carried placard or sign.
+- Large visible carried number rendered dynamically above the head.
 - Soft shadow underneath.
 
 The player and NPCs should share the same construction style but differ in color and visual priority.
@@ -201,15 +201,15 @@ Player style:
 - Main color: saturated green or cyan.
 - Slightly brighter outline or rim.
 - Confident forward-facing pose.
-- Larger or clearer number badge.
-- Optional small backpack or sash to imply carrying a number.
+- No built-in number placard, sign, or baked-in number.
+- Optional small backpack, cap, or sash to make the player distinct.
 
 The player should look active and controllable.
 
 Prompt fragment:
 
 ```text
-isometric toy-like player character for educational puzzle game, rounded cyan body, simple friendly face, small feet, holding a blank number placard, clean 2.5D render, orthographic isometric view, soft shadow, transparent background, no text
+isometric toy-like player character for educational puzzle game, rounded cyan body, simple friendly face, small feet, empty hands, no placard, clean 2.5D render, orthographic isometric view, soft shadow, transparent background, no text
 ```
 
 ## NPC Characters
@@ -221,7 +221,7 @@ NPC style:
 - Rounded toy-like bodies.
 - Different body colors.
 - Simpler than the player.
-- Blank number placard or space for dynamic number text.
+- Empty hands, with no placard or carried sign.
 - Neutral friendly expressions.
 
 Each NPC can have a small visual variation:
@@ -229,14 +229,14 @@ Each NPC can have a small visual variation:
 - Different color.
 - Different head shape.
 - Small cap, antenna-like knob, or scarf.
-- Different placard shape.
+- Different small accessory.
 
 Avoid making NPCs too detailed, because several will be on screen at once.
 
 Prompt fragment:
 
 ```text
-isometric toy-like NPC character for educational puzzle game, rounded orange body, simple friendly face, holding a blank number placard, clean 2.5D render, orthographic isometric view, soft shadow, transparent background, no text
+isometric toy-like NPC character for educational puzzle game, rounded orange body, simple friendly face, empty hands, no placard, clean 2.5D render, orthographic isometric view, soft shadow, transparent background, no text
 ```
 
 ## Number Display
@@ -245,8 +245,8 @@ Numbers are gameplay-critical. They should usually be rendered dynamically in th
 
 Recommended approach:
 
-- Generate blank placards or badges.
-- Draw numbers with canvas text.
+- Generate characters without any placard or baked-in number.
+- Draw floating number badges with canvas text above each character.
 - Use a bold rounded sans-serif font.
 - Use dark text on a light badge.
 - Add a small outline or shadow for contrast.
