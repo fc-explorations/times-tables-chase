@@ -1142,11 +1142,22 @@
     }
 
     function makeDistractorNumbers() {
-      const numbers = new Set(game.settings.allowedBValues);
-      for (const b of game.settings.allowedBValues) {
-        for (let a = 2; a <= 12; a += 1) numbers.add(a * b);
+      const target = game.equation.targetNumber;
+      const candidates = new Set();
+
+      if (game.equation.missing === "b") {
+        for (const b of game.settings.allowedBValues) candidates.add(b);
+      } else {
+        for (const b of game.settings.allowedBValues) {
+          for (let a = 2; a <= 12; a += 1) candidates.add(a * b);
+        }
       }
-      return Array.from(numbers).filter((value) => value !== game.equation.targetNumber);
+
+      const nearby = Array.from(candidates)
+        .filter((value) => value !== target)
+        .sort((a, b) => Math.abs(a - target) - Math.abs(b - target) || a - b);
+      const poolSize = clamp(game.currentNpcCount + 4, 6, nearby.length);
+      return nearby.slice(0, poolSize);
     }
 
     function createCharacter(type, x, y, carriedNumber, index = 0) {
