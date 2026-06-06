@@ -92,7 +92,7 @@
     }
 
     .splash-screen {
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
       padding: 0;
       background: #bdeee9;
@@ -164,7 +164,7 @@
     }
 
     .menu-panel {
-      width: min(920px, 100%);
+      width: min(1120px, 100%);
       max-height: calc(100vh - 56px);
       overflow: auto;
       border: 1px solid var(--line);
@@ -208,6 +208,22 @@
       max-width: 620px;
     }
 
+    .settings-heading {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: baseline;
+      color: var(--muted);
+      font-size: 16px;
+      font-weight: 650;
+    }
+
+    .settings-heading strong {
+      color: var(--ink);
+      font-size: 26px;
+      font-weight: 950;
+    }
+
     .button-row {
       display: flex;
       flex-wrap: wrap;
@@ -249,7 +265,7 @@
 
     .settings-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 18px;
       margin-top: 24px;
     }
@@ -357,7 +373,7 @@
 
     #gameScreen {
       display: none;
-      background: #dff1ee url("assets/background/bk.png") center / 100% 100% no-repeat;
+      background: #dff1ee url("assets/background/bk.png") top center / contain no-repeat;
     }
 
     #gameScreen.active {
@@ -371,48 +387,111 @@
       background: transparent;
     }
 
-    .hud {
+    .game-stage {
       position: fixed;
-      top: 6.2%;
-      left: 31.2%;
-      width: 37.6%;
-      min-height: 22.5%;
-      display: grid;
-      grid-template-rows: auto auto;
-      align-content: center;
-      justify-items: center;
-      gap: 10px;
+      top: 0;
+      left: 50%;
+      width: min(100vw, calc(100vh * 1672 / 941));
+      aspect-ratio: 1672 / 941;
+      transform: translateX(-50%);
+      font-size: clamp(10px, min(1vw, 1.78vh), 16px);
       pointer-events: none;
     }
 
-    .hud-group {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
+    .hud {
+      position: absolute;
+      top: 10%;
+      left: 12%;
+      width: 76%;
+      height: 53%;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+      padding: clamp(14px, 1.4vw, 22px);
+      pointer-events: none;
+    }
+
+    .hud-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+      gap: 12px;
+      width: 100%;
       pointer-events: auto;
     }
 
-    .hud-pill {
-      min-height: 38px;
-      border: 1px solid rgba(49, 83, 92, 0.18);
+    .hud-badge {
+      width: fit-content;
+      min-height: 32px;
+      border: 2px solid rgba(31, 99, 109, 0.18);
       border-radius: 8px;
-      padding: 8px 12px;
-      background: rgba(251, 252, 247, 0.92);
-      box-shadow: 0 8px 24px rgba(36, 49, 58, 0.12);
-      color: var(--ink);
+      padding: 5px 10px;
+      background: rgba(255, 246, 199, 0.9);
+      box-shadow: 0 4px 0 rgba(31, 99, 109, 0.12);
+      color: #16636d;
+      font-size: 1.35em;
       font-weight: 900;
     }
 
-    .hud-pill.equation {
+    .hud-badge.score {
+      justify-self: end;
+    }
+
+    .hud-board-card {
+      align-self: center;
+      justify-self: center;
+      width: 72%;
+      border: 2px solid rgba(29, 104, 111, 0.2);
+      border-radius: 8px;
+      padding: clamp(12px, 1.4vw, 18px) clamp(12px, 1.9vw, 24px);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 255, 252, 0.78)),
+        rgba(251, 252, 247, 0.84);
+      box-shadow:
+        inset 0 0 0 2px rgba(255, 255, 255, 0.48),
+        0 10px 26px rgba(36, 49, 58, 0.1);
+      text-align: center;
+      pointer-events: auto;
+    }
+
+    .hud-equation {
       color: #16636d;
-      font-size: 18px;
+      font-size: 3.2em;
+      line-height: 1;
+      font-weight: 1000;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .missing-slot {
+      display: inline-grid;
+      place-items: center;
+      min-width: 1.18em;
+      height: 1.18em;
+      margin: 0 0.05em;
+      border: 3px solid rgba(22, 99, 109, 0.28);
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.95), rgba(255, 209, 102, 0.96) 62%, rgba(239, 177, 52, 0.96));
+      color: #135f6a;
+      box-shadow: 0 5px 0 rgba(157, 116, 22, 0.22);
+    }
+
+    .hud-bottom {
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+      pointer-events: auto;
     }
 
     .hud button {
-      min-height: 38px;
-      padding: 7px 12px;
-      box-shadow: 0 2px 0 rgba(153, 59, 52, 0.38);
+      min-height: 32px;
+      border: 1px solid rgba(31, 99, 109, 0.18);
+      padding: 5px 10px;
+      color: #31535c;
+      background: rgba(233, 245, 242, 0.82);
+      box-shadow: 0 2px 0 rgba(31, 99, 109, 0.14);
+      font-size: 1.28em;
     }
 
     .toast {
@@ -436,6 +515,12 @@
       opacity: 1;
     }
 
+    @media (max-width: 960px) {
+      .settings-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
     @media (max-width: 720px) {
       .title-row,
       .settings-grid {
@@ -447,10 +532,7 @@
       }
 
       .hud {
-        top: 6%;
-        left: 27%;
-        width: 46%;
-        min-height: 23%;
+        padding: 10px;
       }
     }
   </style>
@@ -471,8 +553,10 @@
 
   <section id="settingsScreen" class="screen menu-screen">
     <div class="menu-panel">
-      <h2>Settings</h2>
-      <p class="subtitle">These values set level 1. Later rooms automatically add more NPCs and awareness.</p>
+      <div class="settings-heading">
+        <strong>Settings</strong>
+        <span>These values set level 1. Later rooms automatically add more NPCs and awareness.</span>
+      </div>
 
       <div class="settings-grid">
         <div class="setting-card">
@@ -529,6 +613,24 @@
           </label>
         </div>
 
+        <div class="setting-card">
+          <label for="musicInput">Background music</label>
+          <p class="hint">Play a gentle royalty-free procedural loop during the game.</p>
+          <label class="toggle-row">
+            <input id="musicInput" type="checkbox">
+            <span>Music on</span>
+          </label>
+        </div>
+
+        <div class="setting-card">
+          <label for="soundEffectsInput">Sound effects</label>
+          <p class="hint">Play sounds for swaps, correct exits, and wrong exits.</p>
+          <label class="toggle-row">
+            <input id="soundEffectsInput" type="checkbox">
+            <span>Effects on</span>
+          </label>
+        </div>
+
         <div class="setting-card full">
           <label>Square state duration <span id="squareStateDurationValue"></span></label>
           <p class="hint">Seconds each NPC stays in attract or repel mode before switching. Range: 5 to 30 seconds.</p>
@@ -560,14 +662,18 @@
 
   <section id="gameScreen" class="screen">
     <canvas id="gameCanvas" width="1280" height="720"></canvas>
-    <div class="hud">
-      <div class="hud-group">
-        <div id="levelHud" class="hud-pill">Level 1</div>
-        <div id="scoreHud" class="hud-pill">Score 0</div>
-        <div id="equationHud" class="hud-pill equation">2 x 3 = ?</div>
-      </div>
-      <div class="hud-group">
-        <button id="quitButton" class="danger" type="button">Save & Menu</button>
+    <div class="game-stage">
+      <div class="hud">
+        <div class="hud-top">
+          <div id="levelHud" class="hud-badge">Level 1</div>
+          <div id="scoreHud" class="hud-badge score">Score 0</div>
+        </div>
+        <div class="hud-board-card" aria-live="polite">
+          <div id="equationHud" class="hud-equation">2 &times; 3 = <span class="missing-slot">?</span></div>
+        </div>
+        <div class="hud-bottom">
+          <button id="quitButton" type="button">Menu</button>
+        </div>
       </div>
     </div>
     <div id="toast" class="toast"></div>
@@ -592,7 +698,9 @@
       squareStateMinSeconds: 5,
       squareStateMaxSeconds: 12,
       showAwareness: true,
-      axisMovement: true
+      axisMovement: true,
+      music: true,
+      soundEffects: true
     };
 
     const ROOM = {
@@ -602,8 +710,8 @@
       tileHeight: 42
     };
 
-    const PLAYER_START = { x: 0.55, y: 9.45 };
-    const EXIT = { x: 8.65, y: 1.35, radius: 0.65 };
+    const PLAYER_START = { x: 0.85, y: 9.15 };
+    const EXIT = { x: 8.3, y: 0.9, radius: 0.65 };
     const BASE_CHARACTER_SPEED = 2.8;
     const SPRITE_PATHS = {
       player: "assets/characters/player_cyan_idle.png",
@@ -649,6 +757,8 @@
     const squareStateDurationValue = document.getElementById("squareStateDurationValue");
     const showAwarenessInput = document.getElementById("showAwarenessInput");
     const axisMovementInput = document.getElementById("axisMovementInput");
+    const musicInput = document.getElementById("musicInput");
+    const soundEffectsInput = document.getElementById("soundEffectsInput");
     const bValueChecks = document.getElementById("bValueChecks");
     const leaderboardContent = document.getElementById("leaderboardContent");
     const levelHud = document.getElementById("levelHud");
@@ -684,6 +794,9 @@
       npcs: [],
       walls: [],
       swapEffects: [],
+      correctExitEffects: [],
+      wrongExitEffects: [],
+      pendingTeleport: null,
       activeContacts: new Set(),
       nextCharacterId: 1,
       message: ""
@@ -757,7 +870,9 @@
           squareStateMinSeconds: squareStateRange.min,
           squareStateMaxSeconds: squareStateRange.max,
           showAwareness: typeof stored.showAwareness === "boolean" ? stored.showAwareness : DEFAULT_SETTINGS.showAwareness,
-          axisMovement: typeof stored.axisMovement === "boolean" ? stored.axisMovement : DEFAULT_SETTINGS.axisMovement
+          axisMovement: typeof stored.axisMovement === "boolean" ? stored.axisMovement : DEFAULT_SETTINGS.axisMovement,
+          music: typeof stored.music === "boolean" ? stored.music : DEFAULT_SETTINGS.music,
+          soundEffects: typeof stored.soundEffects === "boolean" ? stored.soundEffects : DEFAULT_SETTINGS.soundEffects
         };
       } catch {
         return { ...DEFAULT_SETTINGS };
@@ -769,10 +884,10 @@
       game.settings.roomSize = size;
       ROOM.width = size;
       ROOM.height = size;
-      PLAYER_START.x = 0.55;
-      PLAYER_START.y = ROOM.height - 0.55;
-      EXIT.x = ROOM.width - 1.35;
-      EXIT.y = 1.35;
+      PLAYER_START.x = 0.85;
+      PLAYER_START.y = ROOM.height - 0.85;
+      EXIT.x = ROOM.width - 1.7;
+      EXIT.y = 0.9;
     }
 
     function saveSettings() {
@@ -851,6 +966,7 @@
       if (name === "splash") renderLeaderboard();
       if (name === "settings") syncSettingsForm();
       if (name === "game") resizeCanvas();
+      syncMusic();
     }
 
     function syncSettingsForm() {
@@ -868,6 +984,8 @@
       updateSquareStateDurationLabel();
       showAwarenessInput.checked = game.settings.showAwareness;
       axisMovementInput.checked = game.settings.axisMovement;
+      musicInput.checked = game.settings.music;
+      soundEffectsInput.checked = game.settings.soundEffects;
       for (const input of bValueChecks.querySelectorAll("input")) {
         input.checked = game.settings.allowedBValues.includes(Number(input.value));
       }
@@ -887,10 +1005,13 @@
         squareStateMinSeconds: squareStateRange.min,
         squareStateMaxSeconds: squareStateRange.max,
         showAwareness: showAwarenessInput.checked,
-        axisMovement: axisMovementInput.checked
+        axisMovement: axisMovementInput.checked,
+        music: musicInput.checked,
+        soundEffects: soundEffectsInput.checked
       };
       applyRoomSize();
       saveSettings();
+      syncMusic();
       syncSettingsForm();
     }
 
@@ -986,6 +1107,13 @@
         : `${equation.a} x ${equation.b} = ?`;
     }
 
+    function formatEquationHtml(equation) {
+      if (!equation) return "";
+      return equation.missing === "b"
+        ? `${equation.a} &times; <span class="missing-slot">?</span> = ${equation.c}`
+        : `${equation.a} &times; ${equation.b} = <span class="missing-slot">?</span>`;
+    }
+
     function solvedEquation(equation) {
       return `${equation.a} x ${equation.b} = ${equation.c}`;
     }
@@ -1051,7 +1179,7 @@
           x: randomRange(0.9, ROOM.width - 0.9),
           y: randomRange(0.9, ROOM.height - 0.9)
         };
-        if (!isPointBlockedByWall(point, 0.7)) return point;
+        if (!isPointBlockedByWall(point, 0.7) && !isPointBlockedByExit(point, 1.15)) return point;
       }
       return {
         x: randomRange(0.9, ROOM.width - 0.9),
@@ -1083,14 +1211,27 @@
       return pointToSegmentDistance(point, a, b) < clearance;
     }
 
+    function rangesOverlap(aStart, aEnd, bStart, bEnd, clearance = 0) {
+      return Math.max(aStart, bStart) <= Math.min(aEnd, bEnd) + clearance;
+    }
+
     function wallsOverlap(a, b) {
-      if (a.axis !== b.axis) return false;
-      if (a.axis === "x") {
-        if (Math.abs(a.y - b.y) > 0.01) return false;
-        return Math.max(a.x, b.x) < Math.min(a.x + a.length, b.x + b.length) + 0.35;
+      const clearance = 0.15;
+      if (a.axis !== b.axis) {
+        const horizontal = a.axis === "x" ? a : b;
+        const vertical = a.axis === "y" ? a : b;
+        const verticalCrossesHorizontalSpan = vertical.x >= horizontal.x - clearance
+          && vertical.x <= horizontal.x + horizontal.length + clearance;
+        const horizontalCrossesVerticalSpan = horizontal.y >= vertical.y - clearance
+          && horizontal.y <= vertical.y + vertical.length + clearance;
+        return verticalCrossesHorizontalSpan && horizontalCrossesVerticalSpan;
       }
-      if (Math.abs(a.x - b.x) > 0.01) return false;
-      return Math.max(a.y, b.y) < Math.min(a.y + a.length, b.y + b.length) + 0.35;
+      if (a.axis === "x") {
+        if (Math.abs(a.y - b.y) > clearance) return false;
+        return rangesOverlap(a.x, a.x + a.length, b.x, b.x + b.length, clearance);
+      }
+      if (Math.abs(a.x - b.x) > clearance) return false;
+      return rangesOverlap(a.y, a.y + a.length, b.y, b.y + b.length, clearance);
     }
 
     function generateWalls() {
@@ -1118,6 +1259,10 @@
       return game.walls.some((wall) => isPointNearWall(point, wall, clearance));
     }
 
+    function isPointBlockedByExit(point, clearance = EXIT.radius) {
+      return distance(point, EXIT) < clearance;
+    }
+
     function startRun() {
       readSettingsForm();
       game.level = 1;
@@ -1127,6 +1272,9 @@
       game.levelTransitionTimer = 0;
       game.wrongExitCooldown = 0;
       game.swapEffects = [];
+      game.correctExitEffects = [];
+      game.wrongExitEffects = [];
+      game.pendingTeleport = null;
       game.activeContacts.clear();
       game.nextCharacterId = 1;
       generateLevel();
@@ -1177,7 +1325,8 @@
     function updateHud() {
       levelHud.textContent = `Level ${game.level}`;
       scoreHud.textContent = `Score ${game.score}`;
-      equationHud.textContent = formatEquation(game.equation);
+      equationHud.innerHTML = formatEquationHtml(game.equation);
+      equationHud.setAttribute("aria-label", formatEquation(game.equation));
     }
 
     let toastTimer = 0;
@@ -1188,7 +1337,151 @@
       toastTimer = setTimeout(() => toast.classList.remove("visible"), duration);
     }
 
+    const audio = {
+      context: null,
+      musicGain: null,
+      musicTimer: 0,
+      musicStep: 0
+    };
+
+    function ensureAudio() {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return null;
+      if (!audio.context) audio.context = new AudioContext();
+      if (audio.context.state === "suspended") audio.context.resume();
+      return audio.context;
+    }
+
+    function playTone({ frequency, duration, type = "sine", volume = 0.12, delay = 0, endFrequency = null }) {
+      const context = ensureAudio();
+      if (!context) return;
+      const start = context.currentTime + delay;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(frequency, start);
+      if (endFrequency) oscillator.frequency.exponentialRampToValueAtTime(endFrequency, start + duration);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(volume, start + 0.018);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.connect(gain).connect(context.destination);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.03);
+    }
+
+    function playCorrectDing() {
+      if (!game.settings.soundEffects) return;
+      playTone({ frequency: 660, duration: 0.16, type: "triangle", volume: 0.11 });
+      playTone({ frequency: 880, duration: 0.2, type: "triangle", volume: 0.1, delay: 0.08 });
+      playTone({ frequency: 1320, duration: 0.26, type: "sine", volume: 0.06, delay: 0.15 });
+    }
+
+    function playWrongDong() {
+      if (!game.settings.soundEffects) return;
+      playTone({ frequency: 220, duration: 0.28, type: "sine", volume: 0.13, endFrequency: 150 });
+      playTone({ frequency: 140, duration: 0.22, type: "triangle", volume: 0.08, delay: 0.16, endFrequency: 110 });
+    }
+
+    function playSwapSwash() {
+      if (!game.settings.soundEffects) return;
+      playTone({ frequency: 280, duration: 0.18, type: "triangle", volume: 0.055, endFrequency: 740 });
+      playTone({ frequency: 740, duration: 0.16, type: "sine", volume: 0.035, delay: 0.07, endFrequency: 420 });
+    }
+
+    function playMusicNote(frequency, delay, duration = 0.34) {
+      const context = ensureAudio();
+      if (!context || !audio.musicGain) return;
+      const start = context.currentTime + delay;
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = "triangle";
+      oscillator.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.035, start + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.connect(gain).connect(audio.musicGain);
+      oscillator.start(start);
+      oscillator.stop(start + duration + 0.03);
+    }
+
+    function scheduleMusicBeat() {
+      if (!audio.context || !audio.musicGain) return;
+      const pattern = [261.63, 329.63, 392.0, 523.25, 392.0, 329.63, 293.66, 392.0];
+      const bass = [130.81, 146.83, 164.81, 196.0];
+      playMusicNote(pattern[audio.musicStep % pattern.length], 0, 0.32);
+      if (audio.musicStep % 2 === 0) playMusicNote(bass[Math.floor(audio.musicStep / 2) % bass.length], 0.02, 0.46);
+      audio.musicStep += 1;
+    }
+
+    function startBackgroundMusic() {
+      const context = ensureAudio();
+      if (!context || audio.musicGain) return;
+      audio.musicGain = context.createGain();
+      audio.musicGain.gain.value = 0.55;
+      audio.musicGain.connect(context.destination);
+      audio.musicStep = 0;
+      scheduleMusicBeat();
+      audio.musicTimer = window.setInterval(scheduleMusicBeat, 520);
+    }
+
+    function stopBackgroundMusic() {
+      if (audio.musicTimer) window.clearInterval(audio.musicTimer);
+      audio.musicTimer = 0;
+      if (audio.musicGain) {
+        audio.musicGain.disconnect();
+        audio.musicGain = null;
+      }
+    }
+
+    function syncMusic() {
+      if (game.screen === "game" && game.settings.music) {
+        startBackgroundMusic();
+      } else {
+        stopBackgroundMusic();
+      }
+    }
+
+    function schedulePlayerTeleport(kind) {
+      game.pendingTeleport = {
+        kind,
+        timer: 0.5,
+        duration: 0.5,
+        destination: { x: PLAYER_START.x, y: PLAYER_START.y }
+      };
+      game.player.x = EXIT.x;
+      game.player.y = EXIT.y;
+      game.player.vx = 0;
+      game.player.vy = 0;
+      game.player.targetVx = 0;
+      game.player.targetVy = 0;
+      game.activeContacts.clear();
+    }
+
+    function updatePendingTeleport(dt) {
+      if (!game.pendingTeleport || !game.player) return;
+      game.pendingTeleport.timer -= dt;
+      game.player.x = EXIT.x;
+      game.player.y = EXIT.y;
+      game.player.vx = 0;
+      game.player.vy = 0;
+      game.player.targetVx = 0;
+      game.player.targetVy = 0;
+      if (game.pendingTeleport.timer <= 0) {
+        const destination = game.pendingTeleport.destination;
+        game.player.x = destination.x;
+        game.player.y = destination.y;
+        game.pendingTeleport = null;
+      }
+    }
+
     function updatePlayer(dt) {
+      if (game.pendingTeleport) {
+        game.player.targetVx = 0;
+        game.player.targetVy = 0;
+        game.player.vx = 0;
+        game.player.vy = 0;
+        return;
+      }
       let sx = 0;
       let sy = 0;
       if (keys.has("arrowleft") || keys.has("a")) sx -= 1;
@@ -1288,7 +1581,7 @@
         npc.stuckTimer += dt;
       }
 
-      if (npc.stuckTimer > 1.1 || Math.hypot(npc.vx, npc.vy) < 0.08 && Math.hypot(npc.targetVx, npc.targetVy) > 0.2) {
+      if (npc.stuckTimer > 1.1 || (Math.hypot(npc.vx, npc.vy) < 0.08 && Math.hypot(npc.targetVx, npc.targetVy) > 0.2)) {
         npc.waypoint = randomWaypoint();
         npc.lastProgressDistance = Infinity;
         npc.stuckTimer = 0;
@@ -1340,6 +1633,32 @@
       }
     }
 
+    function resolveNpcExitCollision(character, oldX, oldY) {
+      if (character.type !== "npc") return;
+      const radius = EXIT.radius + character.radius + 0.08;
+      const dx = character.x - EXIT.x;
+      const dy = character.y - EXIT.y;
+      const gap = Math.hypot(dx, dy);
+      if (gap >= radius) return;
+
+      const oldDx = oldX - EXIT.x;
+      const oldDy = oldY - EXIT.y;
+      const fallback = normalize(ROOM.width * 0.5 - EXIT.x, ROOM.height * 0.5 - EXIT.y);
+      const direction = gap > 0.001
+        ? { x: dx / gap, y: dy / gap }
+        : normalize(oldDx, oldDy);
+      const nx = Math.abs(direction.x) + Math.abs(direction.y) > 0.001 ? direction.x : fallback.x;
+      const ny = Math.abs(direction.x) + Math.abs(direction.y) > 0.001 ? direction.y : fallback.y;
+
+      character.x = clamp(EXIT.x + nx * radius, 0.45, ROOM.width - 0.45);
+      character.y = clamp(EXIT.y + ny * radius, 0.45, ROOM.height - 0.45);
+      character.vx *= -0.25;
+      character.vy *= -0.25;
+      character.targetVx *= -0.25;
+      character.targetVy *= -0.25;
+      resetNpcPath(character);
+    }
+
     function moveCharacter(character, dt) {
       const oldX = character.x;
       const oldY = character.y;
@@ -1362,6 +1681,7 @@
         resetNpcPath(character);
       }
       resolveWallCollision(character, oldX, oldY);
+      resolveNpcExitCollision(character, oldX, oldY);
     }
 
     function separateOverlaps(characters) {
@@ -1409,6 +1729,12 @@
       game.swapEffects = game.swapEffects
         .map((effect) => ({ ...effect, life: effect.life - dt }))
         .filter((effect) => effect.life > 0);
+      game.correctExitEffects = game.correctExitEffects
+        .map((effect) => ({ ...effect, life: effect.life - dt }))
+        .filter((effect) => effect.life > 0);
+      game.wrongExitEffects = game.wrongExitEffects
+        .map((effect) => ({ ...effect, life: effect.life - dt }))
+        .filter((effect) => effect.life > 0);
     }
 
     function handleSwaps() {
@@ -1436,13 +1762,21 @@
             b.swapCooldown = 0.75;
             game.activeContacts.add(contactKey);
             separateOverlaps([a, b]);
-            game.swapEffects.push({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, life: 0.45 });
+            const playerInvolved = a.type === "player" || b.type === "player";
+            game.swapEffects.push({
+              x: (a.x + b.x) / 2,
+              y: (a.y + b.y) / 2,
+              life: 0.5,
+              kind: playerInvolved ? "player" : "npc"
+            });
+            if (playerInvolved) playSwapSwash();
           }
         }
       }
     }
 
     function checkExit() {
+      if (game.pendingTeleport) return;
       if (game.levelTransitionTimer > 0) return;
       if (distance(game.player, EXIT) > EXIT.radius) return;
       if (game.player.carriedNumber === game.equation.targetNumber) {
@@ -1450,10 +1784,16 @@
         game.score += points;
         game.highestLevelReached = Math.max(game.highestLevelReached, game.level);
         game.levelTransitionTimer = 1.35;
+        game.correctExitEffects.push({ x: EXIT.x, y: EXIT.y, life: 0.75 });
+        schedulePlayerTeleport("correct");
+        playCorrectDing();
         updateHud();
         showToast(`Correct: ${solvedEquation(game.equation)}. +${points} points`, 1250);
       } else if (game.wrongExitCooldown <= 0) {
         game.wrongExitCooldown = 1.2;
+        game.wrongExitEffects.push({ x: EXIT.x, y: EXIT.y, life: 0.75 });
+        schedulePlayerTeleport("wrong");
+        playWrongDong();
         showToast(`Wrong number. You are carrying ${game.player.carriedNumber}.`, 1200);
       }
     }
@@ -1473,6 +1813,7 @@
       }
 
       updateCooldowns(dt);
+      updatePendingTeleport(dt);
       updatePlayer(dt);
       const characters = [game.player, ...game.npcs];
       for (const npc of game.npcs) updateNpc(npc, characters, dt);
@@ -1501,6 +1842,7 @@
     }
 
     function drawRoom() {
+      drawRoomShadow();
       for (let y = 0; y < ROOM.height; y += 1) {
         for (let x = 0; x < ROOM.width; x += 1) {
           const accent = (x + y) % 5 === 0 ? "#edf8ee" : (x + y) % 3 === 0 ? "#e6f3f7" : "#f7fbf4";
@@ -1509,8 +1851,27 @@
       }
 
       drawBoundary();
-      drawWalls();
       drawExit();
+    }
+
+    function drawRoomShadow() {
+      const corners = [
+        project(0, 0),
+        project(ROOM.width, 0),
+        project(ROOM.width, ROOM.height),
+        project(0, ROOM.height)
+      ];
+      ctx.save();
+      ctx.shadowColor = "rgba(32, 85, 91, 0.18)";
+      ctx.shadowBlur = 42;
+      ctx.shadowOffsetY = 34;
+      ctx.fillStyle = "rgba(32, 85, 91, 0.012)";
+      ctx.beginPath();
+      ctx.moveTo(corners[0].x, corners[0].y);
+      for (let i = 1; i < corners.length; i += 1) ctx.lineTo(corners[i].x, corners[i].y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
     }
 
     function drawBoundary() {
@@ -1536,6 +1897,47 @@
       for (const wall of game.walls) drawWall(wall);
     }
 
+    function drawWallAsset(wall, start, end, length) {
+      const image = images.walls[wallKey(wall)];
+      if (!image || !image.ready || !image.width || !image.height) return false;
+
+      const imageDiagonal = Math.hypot(image.width, image.height);
+      const targetDiagonal = length + tileWidth() * 0.35;
+      const scale = targetDiagonal / imageDiagonal;
+      const lengthStretch = 1.12;
+      const drawWidth = image.width * scale * lengthStretch;
+      const drawHeight = image.height * scale;
+      const midpoint = {
+        x: (start.x + end.x) / 2,
+        y: (start.y + end.y) / 2
+      };
+
+      ctx.save();
+      ctx.filter = "blur(3px)";
+      ctx.strokeStyle = "rgba(35, 49, 58, 0.13)";
+      ctx.lineWidth = Math.max(7, tileHeight() * 0.22);
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(start.x - (end.x - start.x) * 0.06, start.y - (end.y - start.y) * 0.06 + tileHeight() * 0.38);
+      ctx.lineTo(end.x + (end.x - start.x) * 0.06, end.y + (end.y - start.y) * 0.06 + tileHeight() * 0.38);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.save();
+      const rotationAdjust = wall.axis === "x" ? -Math.PI / 90 : Math.PI / 90;
+      ctx.translate(midpoint.x, midpoint.y - drawHeight * 0.12);
+      ctx.rotate(rotationAdjust);
+      ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+      ctx.restore();
+      return true;
+    }
+
+    function wallDepth(wall) {
+      return wall.axis === "x"
+        ? wall.x + wall.length / 2 + wall.y
+        : wall.x + wall.y + wall.length / 2;
+    }
+
     function drawWall(wall) {
       const [a, b] = wallEndpoints(wall);
       const start = project(a.x, a.y);
@@ -1544,6 +1946,7 @@
       const dy = end.y - start.y;
       const length = Math.hypot(dx, dy);
       if (length < 0.001) return;
+      if (drawWallAsset(wall, start, end, length)) return;
 
       const nx = -dy / length;
       const ny = dx / length;
@@ -1620,12 +2023,16 @@
 
     function drawExit() {
       const p = project(EXIT.x, EXIT.y);
+      const shadowAngle = Math.atan2(tileHeight(), tileWidth());
       ctx.save();
       ctx.translate(p.x, p.y + 12);
-      ctx.fillStyle = "rgba(35, 49, 58, 0.16)";
+      ctx.filter = "blur(2px)";
+      ctx.fillStyle = "rgba(35, 49, 58, 0.13)";
       ctx.beginPath();
-      ctx.ellipse(0, 30, 44, 15, 0, 0, Math.PI * 2);
+      ctx.ellipse(-43, 30, 24, 8, shadowAngle, 0, Math.PI * 2);
+      ctx.ellipse(43, 30, 24, 8, shadowAngle, 0, Math.PI * 2);
       ctx.fill();
+      ctx.filter = "none";
 
       if (images.exitDoorSign && images.exitDoorSign.ready) {
         const size = Math.max(160, Math.min(220, tileWidth() * 2.7));
@@ -1725,9 +2132,15 @@
       const isPlayer = character.type === "player";
       const image = isPlayer ? images.player : images.npcs[character.spriteIndex % images.npcs.length];
       const size = isPlayer ? 82 : 74;
+      const jitter = isPlayer && game.pendingTeleport
+        ? {
+          x: Math.sin(game.timeSeconds * 95) * 3.2,
+          y: Math.cos(game.timeSeconds * 111) * 2.2
+        }
+        : { x: 0, y: 0 };
 
       ctx.save();
-      ctx.translate(p.x, p.y);
+      ctx.translate(p.x + jitter.x, p.y + jitter.y);
       ctx.fillStyle = "rgba(35, 49, 58, 0.20)";
       ctx.beginPath();
       ctx.ellipse(0, 24, 27, 9, 0, 0, Math.PI * 2);
@@ -1778,20 +2191,74 @@
     function drawSwapEffects() {
       for (const effect of game.swapEffects) {
         const p = project(effect.x, effect.y);
-        const alpha = clamp(effect.life / 0.45, 0, 1);
+        const alpha = clamp(effect.life / 0.5, 0, 1);
+        const progress = 1 - alpha;
+        const isPlayerSwap = effect.kind === "player";
+        const stroke = isPlayerSwap ? "rgba(31, 205, 196, 0.95)" : "rgba(255, 210, 108, 0.92)";
+        const fill = isPlayerSwap ? "#20d8cf" : "#ffd86f";
         ctx.save();
+        ctx.translate(p.x, p.y + 18);
         ctx.globalAlpha = alpha;
-        ctx.translate(p.x, p.y - 40);
-        ctx.strokeStyle = "#f1b82d";
-        ctx.lineWidth = 4;
+        ctx.shadowColor = stroke;
+        ctx.shadowBlur = isPlayerSwap ? 20 : 16;
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = isPlayerSwap ? 5 : 4;
         ctx.beginPath();
-        ctx.arc(0, 0, 18, -0.2, Math.PI * 1.2);
+        ctx.ellipse(0, 0, 34 + progress * 18, 13 + progress * 7, 0, 0, Math.PI * 2);
         ctx.stroke();
+        ctx.globalAlpha = alpha * 0.22;
+        ctx.fillStyle = fill;
         ctx.beginPath();
-        ctx.moveTo(17, -8);
-        ctx.lineTo(27, -4);
-        ctx.lineTo(19, 4);
+        ctx.ellipse(0, 0, 40 + progress * 22, 15 + progress * 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function drawCorrectExitEffects() {
+      for (const effect of game.correctExitEffects) {
+        const p = project(effect.x, effect.y);
+        const progress = 1 - clamp(effect.life / 0.75, 0, 1);
+        const alpha = clamp(effect.life / 0.75, 0, 1);
+        ctx.save();
+        ctx.translate(p.x, p.y + 16);
+        ctx.globalAlpha = alpha;
+        ctx.shadowColor = "rgba(69, 220, 112, 0.95)";
+        ctx.shadowBlur = 26;
+        ctx.strokeStyle = "rgba(69, 220, 112, 0.98)";
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 42 + progress * 30, 18 + progress * 13, 0, 0, Math.PI * 2);
         ctx.stroke();
+        ctx.globalAlpha = alpha * 0.25;
+        ctx.fillStyle = "#4be278";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 50 + progress * 34, 22 + progress * 15, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function drawWrongExitEffects() {
+      for (const effect of game.wrongExitEffects) {
+        const p = project(effect.x, effect.y);
+        const progress = 1 - clamp(effect.life / 0.75, 0, 1);
+        const alpha = clamp(effect.life / 0.75, 0, 1);
+        ctx.save();
+        ctx.translate(p.x, p.y + 16);
+        ctx.globalAlpha = alpha;
+        ctx.shadowColor = "rgba(238, 42, 48, 0.95)";
+        ctx.shadowBlur = 24;
+        ctx.strokeStyle = "rgba(238, 42, 48, 0.95)";
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 42 + progress * 28, 18 + progress * 12, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = alpha * 0.24;
+        ctx.fillStyle = "#ff3a3f";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 48 + progress * 32, 21 + progress * 14, 0, 0, Math.PI * 2);
+        ctx.fill();
         ctx.restore();
       }
     }
@@ -1802,11 +2269,21 @@
 
       for (const npc of game.npcs) drawAwareness(npc);
 
-      const characters = [game.player, ...game.npcs].filter(Boolean);
-      characters.sort((a, b) => (a.x + a.y) - (b.x + b.y));
-      for (const character of characters) drawCharacter(character);
+      const sceneObjects = [
+        ...game.walls.map((wall) => ({ type: "wall", depth: wallDepth(wall), wall })),
+        ...[game.player, ...game.npcs]
+          .filter(Boolean)
+          .map((character) => ({ type: "character", depth: character.x + character.y, character }))
+      ];
+      sceneObjects.sort((a, b) => a.depth - b.depth);
+      for (const object of sceneObjects) {
+        if (object.type === "wall") drawWall(object.wall);
+        else drawCharacter(object.character);
+      }
 
       drawSwapEffects();
+      drawCorrectExitEffects();
+      drawWrongExitEffects();
       drawEquationSign();
     }
 
@@ -1856,6 +2333,8 @@
     squareStateMaxInput.addEventListener("change", readSettingsForm);
     showAwarenessInput.addEventListener("change", readSettingsForm);
     axisMovementInput.addEventListener("change", readSettingsForm);
+    musicInput.addEventListener("change", readSettingsForm);
+    soundEffectsInput.addEventListener("change", readSettingsForm);
     bValueChecks.addEventListener("change", readSettingsForm);
 
     window.addEventListener("resize", () => {
