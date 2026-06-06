@@ -4,6 +4,8 @@ Times Table Chase is an educational isometric chase game for practicing multipli
 
 The player controls a character carrying a visible number. Each NPC also carries a number. The goal is to reach the exit while carrying the number that solves the multiplication equation shown on the exit sign.
 
+[LINK to the game](https://fc-explorations.github.io/times-tables-chase/)
+
 ## Game Idea
 
 Each room has an exit with a partial multiplication equation:
