@@ -733,13 +733,13 @@
         <div class="setting-card">
           <label class="setting-title" for="speedInput"><span class="setting-icon" aria-hidden="true">▶</span><span>Speed <span id="speedValue"></span></span></label>
           <p class="hint">Higher speed is harder and awards more points.</p>
-          <input id="speedInput" type="range" min="0.75" max="1.75" step="0.05">
+          <input id="speedInput" type="range" min="0.75" max="2" step="0.05">
         </div>
 
         <div class="setting-card">
           <label class="setting-title" for="playerNpcSpeedRatioInput"><span class="setting-icon" aria-hidden="true">↔</span><span>Player speed ratio <span id="playerNpcSpeedRatioValue"></span></span></label>
           <p class="hint">Above 1 makes the player faster than NPCs. Below 1 is harder and awards more points.</p>
-          <input id="playerNpcSpeedRatioInput" type="range" min="0.5" max="1.5" step="0.05">
+          <input id="playerNpcSpeedRatioInput" type="range" min="0.5" max="1.75" step="0.05">
         </div>
 
         <div class="setting-card">
@@ -838,7 +838,7 @@
           <div id="equationHud" class="hud-equation">2 &times; 3 = <span class="missing-slot">?</span></div>
         </div>
         <button id="charactersButton" class="hud-characters-button" type="button" aria-label="Open characters">Characters</button>
-        <button id="quitButton" class="hud-menu-button" type="button" aria-label="Open menu">
+        <button id="quitButton" class="hud-menu-button" type="button" aria-label="Open settings">
           <span class="gear-icon" aria-hidden="true">&#9881;</span>
         </button>
       </div>
@@ -878,6 +878,17 @@
       tileHeight: 42
     };
 
+    const FLOOR_PALETTES = [
+      { base: "#f7fbf4", soft: "#edf8ee", accent: "#e6f3f7", grid: "#b9d7d1" },
+      { base: "#fff8ef", soft: "#f7efd8", accent: "#eef6f2", grid: "#d8cda8" },
+      { base: "#f3f7ff", soft: "#e7effd", accent: "#eef8f4", grid: "#b7cbe0" },
+      { base: "#fff2f2", soft: "#f9e5e8", accent: "#f4f7ef", grid: "#dfbdc1" },
+      { base: "#f4fff9", soft: "#e3f7eb", accent: "#f2f3ff", grid: "#aed6c2" },
+      { base: "#fff9e5", soft: "#f5edd0", accent: "#edf7fb", grid: "#d4c58b" },
+      { base: "#f8f2ff", soft: "#eee5fb", accent: "#f3f8ec", grid: "#c8b9dc" },
+      { base: "#eefbff", soft: "#def3f8", accent: "#fff6ec", grid: "#abd2dc" }
+    ];
+
     const PLAYER_START = { x: 0.85, y: 9.15 };
     const EXIT = { x: 8.3, y: 0.9, radius: 0.65 };
     const BASE_CHARACTER_SPEED = 2.8;
@@ -900,13 +911,13 @@
 
     const CHARACTER_OPTIONS = [
       { id: "default", name: "Classic", cost: 0, src: SPRITE_PATHS.player },
-      { id: "scout", name: "Scout", cost: 500, src: "assets/characters/player_cyan_1.png" },
-      { id: "ranger", name: "Ranger", cost: 1200, src: "assets/characters/player_cyan_2.png" },
-      { id: "royal", name: "Royal", cost: 2200, src: "assets/characters/player_cyan_3.png" },
-      { id: "ruby", name: "Ruby", cost: 3500, src: "assets/characters/player_cyan_4.png" },
-      { id: "silver", name: "Silver", cost: 5000, src: "assets/characters/player_cyan_5.png" },
-      { id: "gold", name: "Gold", cost: 7000, src: "assets/characters/player_cyan_6.png" },
-      { id: "obsidian", name: "Obsidian", cost: 9000, src: "assets/characters/player_cyan_7.png" }
+      { id: "scout", name: "Scout", cost: 15, src: "assets/characters/player_cyan_1.png" },
+      { id: "ranger", name: "Ranger", cost: 22, src: "assets/characters/player_cyan_2.png" },
+      { id: "royal", name: "Royal", cost: 32, src: "assets/characters/player_cyan_3.png" },
+      { id: "ruby", name: "Ruby", cost: 45, src: "assets/characters/player_cyan_4.png" },
+      { id: "silver", name: "Silver", cost: 60, src: "assets/characters/player_cyan_5.png" },
+      { id: "gold", name: "Gold", cost: 80, src: "assets/characters/player_cyan_6.png" },
+      { id: "obsidian", name: "Obsidian", cost: 100, src: "assets/characters/player_cyan_7.png" }
     ];
 
     const CHARACTER_ID_ALIASES = {
@@ -1075,8 +1086,8 @@
           awarenessAmount: clamp(Number(stored.awarenessAmount) || 0, 0, 1),
           roomSize: clamp(Math.floor(Number(stored.roomSize) || DEFAULT_SETTINGS.roomSize), 6, 20),
           wallCount: clamp(Math.floor(Number.isFinite(Number(stored.wallCount)) ? Number(stored.wallCount) : DEFAULT_SETTINGS.wallCount), 0, 12),
-          speedMultiplier: clamp(Number(stored.speedMultiplier) || DEFAULT_SETTINGS.speedMultiplier, 0.75, 1.75),
-          playerNpcSpeedRatio: clamp(Number(stored.playerNpcSpeedRatio) || DEFAULT_SETTINGS.playerNpcSpeedRatio, 0.5, 1.5),
+          speedMultiplier: clamp(Number(stored.speedMultiplier) || DEFAULT_SETTINGS.speedMultiplier, 0.75, 2),
+          playerNpcSpeedRatio: clamp(Number(stored.playerNpcSpeedRatio) || DEFAULT_SETTINGS.playerNpcSpeedRatio, 0.5, 1.75),
           squareStateMinSeconds: squareStateRange.min,
           squareStateMaxSeconds: squareStateRange.max,
           showAwareness: typeof stored.showAwareness === "boolean" ? stored.showAwareness : DEFAULT_SETTINGS.showAwareness,
@@ -1301,8 +1312,8 @@
         wallCount: clamp(Math.floor(Number(wallCountInput.value) || 0), 0, 12),
         allowedBValues: selected.length ? selected : [...DEFAULT_SETTINGS.allowedBValues],
         awarenessAmount: clamp(Number(awarenessInput.value), 0, 1),
-        speedMultiplier: clamp(Number(speedInput.value) || DEFAULT_SETTINGS.speedMultiplier, 0.75, 1.75),
-        playerNpcSpeedRatio: clamp(Number(playerNpcSpeedRatioInput.value) || DEFAULT_SETTINGS.playerNpcSpeedRatio, 0.5, 1.5),
+        speedMultiplier: clamp(Number(speedInput.value) || DEFAULT_SETTINGS.speedMultiplier, 0.75, 2),
+        playerNpcSpeedRatio: clamp(Number(playerNpcSpeedRatioInput.value) || DEFAULT_SETTINGS.playerNpcSpeedRatio, 0.5, 1.75),
         squareStateMinSeconds: squareStateRange.min,
         squareStateMaxSeconds: squareStateRange.max,
         showAwareness: showAwarenessInput.checked,
@@ -1515,6 +1526,8 @@
         swapCooldown: 0,
         awarenessRadius: 0,
         phase: type === "npc" ? randomRange(0, wavelength) : 0,
+        walkPhase: 0,
+        walkAmount: 0,
         stateDuration,
         wavelength,
         waypoint: type === "npc" ? randomWaypoint() : null,
@@ -1695,17 +1708,7 @@
     }
 
     function calculateRoomScore() {
-      const base = 100;
-      const levelBonus = game.level * 25;
-      const rangeBonus = game.settings.allowedBValues.length * 15;
-      const maxB = Math.max(...game.settings.allowedBValues);
-      const numberBonus = game.equation.a * 2 + game.equation.b * 3 + Math.floor(game.equation.c / 2) + maxB * 5;
-      const npcBonus = game.currentNpcCount * 20;
-      const wallBonus = game.walls.length * 35;
-      const awarenessBonus = Math.round(game.currentAwarenessAmount * 100);
-      const speedBonus = Math.round(game.settings.speedMultiplier * 80);
-      const playerRatioBonus = Math.round((1.6 - game.settings.playerNpcSpeedRatio) * 100);
-      return base + levelBonus + rangeBonus + numberBonus + npcBonus + wallBonus + awarenessBonus + speedBonus + playerRatioBonus;
+      return 5;
     }
 
     function updateHud() {
@@ -1952,10 +1955,11 @@
     }
 
     function schedulePlayerTeleport(kind) {
+      const duration = kind === "correct" ? 0.55 : 0.5;
       game.pendingTeleport = {
         kind,
-        timer: 0.5,
-        duration: 0.5,
+        timer: duration,
+        duration,
         destination: { x: PLAYER_START.x, y: PLAYER_START.y }
       };
       game.player.x = EXIT.x;
@@ -1977,6 +1981,14 @@
       game.player.targetVx = 0;
       game.player.targetVy = 0;
       if (game.pendingTeleport.timer <= 0) {
+        if (game.pendingTeleport.kind === "correct") {
+          game.pendingTeleport = null;
+          game.level += 1;
+          game.highestLevelReached = Math.max(game.highestLevelReached, game.level);
+          generateLevel();
+          showToast("Next room.", 900);
+          return;
+        }
         const destination = game.pendingTeleport.destination;
         game.player.x = destination.x;
         game.player.y = destination.y;
@@ -2210,6 +2222,15 @@
       }
       resolveWallCollision(character, oldX, oldY);
       resolveNpcExitCollision(character, oldX, oldY);
+
+      const movedDistance = Math.hypot(character.x - oldX, character.y - oldY);
+      const movementSpeed = movedDistance / Math.max(dt, 0.001);
+      if (movementSpeed > 0.04) {
+        character.walkPhase += movedDistance * Math.PI * 3.3;
+        character.walkAmount = clamp(character.walkAmount + dt * 8, 0, 1);
+      } else {
+        character.walkAmount = Math.max(0, character.walkAmount - dt * 10);
+      }
     }
 
     function separateOverlaps(characters) {
@@ -2265,6 +2286,42 @@
         .filter((effect) => effect.life > 0);
     }
 
+    function bounceAfterSwap(a, b) {
+      let dx = b.x - a.x;
+      let dy = b.y - a.y;
+      let d = Math.hypot(dx, dy);
+      if (d < 0.0001) {
+        const dir = fallbackDirection(a.id * 13 + b.id * 19);
+        dx = dir.x;
+        dy = dir.y;
+        d = 1;
+      }
+
+      const nx = dx / d;
+      const ny = dy / d;
+      const minDistance = a.interactionRadius + b.interactionRadius;
+      const overlap = Math.max(0, minDistance - d);
+      const push = overlap * 0.62 + 0.16;
+      const playerInvolved = a.type === "player" || b.type === "player";
+      const impulse = (playerInvolved ? 2.8 : 2.25) * game.settings.speedMultiplier;
+
+      a.x = clamp(a.x - nx * push, 0.45, ROOM.width - 0.45);
+      a.y = clamp(a.y - ny * push, 0.45, ROOM.height - 0.45);
+      b.x = clamp(b.x + nx * push, 0.45, ROOM.width - 0.45);
+      b.y = clamp(b.y + ny * push, 0.45, ROOM.height - 0.45);
+
+      a.vx = -nx * impulse;
+      a.vy = -ny * impulse;
+      b.vx = nx * impulse;
+      b.vy = ny * impulse;
+      a.targetVx = -nx * impulse * 0.3;
+      a.targetVy = -ny * impulse * 0.3;
+      b.targetVx = nx * impulse * 0.3;
+      b.targetVy = ny * impulse * 0.3;
+      a.walkAmount = 1;
+      b.walkAmount = 1;
+    }
+
     function handleSwaps() {
       const characters = [game.player, ...game.npcs];
       for (let i = 0; i < characters.length; i += 1) {
@@ -2289,7 +2346,7 @@
             a.swapCooldown = 0.75;
             b.swapCooldown = 0.75;
             game.activeContacts.add(contactKey);
-            separateOverlaps([a, b]);
+            bounceAfterSwap(a, b);
             const playerInvolved = a.type === "player" || b.type === "player";
             game.swapEffects.push({
               x: (a.x + b.x) / 2,
@@ -2311,7 +2368,6 @@
         const points = calculateRoomScore();
         game.score += points;
         game.highestLevelReached = Math.max(game.highestLevelReached, game.level);
-        game.levelTransitionTimer = 1.35;
         game.correctExitEffects.push({ x: EXIT.x, y: EXIT.y, life: 0.75 });
         schedulePlayerTeleport("correct");
         playCorrectDing();
@@ -2350,7 +2406,11 @@
       checkExit();
     }
 
-    function drawTile(x, y, fill) {
+    function currentFloorPalette() {
+      return FLOOR_PALETTES[(game.level - 1) % FLOOR_PALETTES.length];
+    }
+
+    function drawTile(x, y, fill, stroke) {
       const p = project(x, y);
       const tw = tileWidth();
       const th = tileHeight();
@@ -2364,17 +2424,18 @@
       ctx.closePath();
       ctx.fillStyle = fill;
       ctx.fill();
-      ctx.strokeStyle = "#b9d7d1";
+      ctx.strokeStyle = stroke;
       ctx.lineWidth = 1;
       ctx.stroke();
     }
 
     function drawRoom() {
+      const palette = currentFloorPalette();
       drawRoomShadow();
       for (let y = 0; y < ROOM.height; y += 1) {
         for (let x = 0; x < ROOM.width; x += 1) {
-          const accent = (x + y) % 5 === 0 ? "#edf8ee" : (x + y) % 3 === 0 ? "#e6f3f7" : "#f7fbf4";
-          drawTile(x, y, accent);
+          const accent = (x + y) % 5 === 0 ? palette.soft : (x + y) % 3 === 0 ? palette.accent : palette.base;
+          drawTile(x, y, accent, palette.grid);
         }
       }
 
@@ -2441,13 +2502,13 @@
       };
 
       ctx.save();
-      ctx.filter = "blur(3px)";
-      ctx.strokeStyle = "rgba(35, 49, 58, 0.13)";
-      ctx.lineWidth = Math.max(3, tileHeight() * 0.22);
+      ctx.filter = "blur(4px)";
+      ctx.strokeStyle = "rgba(35, 49, 58, 0.15)";
+      ctx.lineWidth = Math.max(6, tileHeight() * 0.44);
       ctx.lineCap = "round";
       ctx.beginPath();
-      ctx.moveTo(start.x - (end.x - start.x) * 0.06, start.y - (end.y - start.y) * 0.06 + tileHeight() * 0.38);
-      ctx.lineTo(end.x + (end.x - start.x) * 0.06, end.y + (end.y - start.y) * 0.06 + tileHeight() * 0.38);
+      ctx.moveTo(start.x - (end.x - start.x) * 0.06, start.y - (end.y - start.y) * 0.06 + tileHeight() * 0.24);
+      ctx.lineTo(end.x + (end.x - start.x) * 0.06, end.y + (end.y - start.y) * 0.06 + tileHeight() * 0.24);
       ctx.stroke();
       ctx.restore();
 
@@ -2471,19 +2532,19 @@
       const tileDistanceToWall = pointToSegmentDistance(character, a, b);
 
       if (tileDistanceToWall <= 1.2) {
-        if (wall.axis === "x") {
-          const withinSpan = character.x >= wall.x - 0.55
-            && character.x <= wall.x + wall.length + 0.55;
-          if (withinSpan) {
-            const side = character.y - wall.y;
-            if (Math.abs(side) > 0.04) return side > 0 ? -1 : 1;
-          }
-        } else {
-          const withinSpan = character.y >= wall.y - 0.55
-            && character.y <= wall.y + wall.length + 0.55;
-          if (withinSpan) {
-            const side = character.x - wall.x;
-            if (Math.abs(side) > 0.04) return side > 0 ? -1 : 1;
+        const withinSpan = wall.axis === "x"
+          ? character.x >= wall.x - 0.55 && character.x <= wall.x + wall.length + 0.55
+          : character.y >= wall.y - 0.55 && character.y <= wall.y + wall.length + 0.55;
+        if (withinSpan) {
+          const wallPoint = wall.axis === "x"
+            ? { x: clamp(character.x, wall.x, wall.x + wall.length), y: wall.y }
+            : { x: wall.x, y: clamp(character.y, wall.y, wall.y + wall.length) };
+          const localWallBase = project(wallPoint.x, wallPoint.y);
+          const characterBase = project(character.x, character.y);
+          const wallFrontY = localWallBase.y + tileHeight() * 0.1;
+          const delta = characterBase.y - wallFrontY;
+          if (Math.abs(delta) > tileHeight() * 0.05) {
+            return delta > 0 ? -1 : 1;
           }
         }
       }
@@ -2534,10 +2595,10 @@
       ctx.save();
       ctx.fillStyle = "rgba(35, 49, 58, 0.10)";
       ctx.beginPath();
-      ctx.moveTo(topD.x + 3, topD.y + height + 3);
-      ctx.lineTo(topC.x + 3, topC.y + height + 3);
-      ctx.lineTo(topB.x + 5, topB.y + height + 5);
-      ctx.lineTo(topA.x + 5, topA.y + height + 5);
+      ctx.moveTo(bottomD.x + 3, bottomD.y + 2);
+      ctx.lineTo(bottomC.x + 3, bottomC.y + 2);
+      ctx.lineTo(bottomC.x + 7, bottomC.y + height * 0.38);
+      ctx.lineTo(bottomD.x + 7, bottomD.y + height * 0.38);
       ctx.closePath();
       ctx.fill();
 
@@ -2724,11 +2785,18 @@
       ctx.save();
       ctx.translate(p.x + jitter.x, p.y + jitter.y);
       const shadowScale = size / 82;
+      const walkAmount = character.walkAmount || 0;
+      const walkPhase = character.walkPhase || 0;
+      const wobbleRotation = Math.sin(walkPhase) * 0.11 * walkAmount;
+      const wobbleY = Math.abs(Math.sin(walkPhase)) * -3.2 * shadowScale * walkAmount;
       ctx.fillStyle = "rgba(35, 49, 58, 0.20)";
       ctx.beginPath();
       ctx.ellipse(0, 24 * shadowScale, 27 * shadowScale, 9 * shadowScale, 0, 0, Math.PI * 2);
       ctx.fill();
 
+      ctx.save();
+      ctx.translate(0, wobbleY);
+      ctx.rotate(wobbleRotation);
       if (image && image.ready) {
         ctx.drawImage(image, -size / 2, -size + 28 * shadowScale, size, size);
       } else {
@@ -2737,6 +2805,7 @@
         drawFallbackCharacter(isPlayer);
         ctx.restore();
       }
+      ctx.restore();
 
       if (drawBadge) drawNumberBadge(character.carriedNumber, isPlayer);
       ctx.restore();
@@ -2882,11 +2951,7 @@
       sceneObjects.sort(compareSceneObjects);
       for (const object of sceneObjects) {
         if (object.type === "wall") drawWall(object.wall);
-        else drawCharacter(object.character, { badge: false });
-      }
-
-      for (const character of [game.player, ...game.npcs].filter(Boolean)) {
-        drawCharacterBadge(character);
+        else drawCharacter(object.character);
       }
 
       drawSwapEffects();
@@ -2905,10 +2970,10 @@
       requestAnimationFrame(loop);
     }
 
-    function quitToMenu() {
+    function openSettingsFromGame() {
       maybeRecordScore();
       game.running = false;
-      showScreen("splash");
+      showScreen("settings");
     }
 
     startButton.addEventListener("click", startRun);
@@ -2921,7 +2986,7 @@
     });
     charactersButton.addEventListener("click", () => showScreen("characters"));
     charactersBackButton.addEventListener("click", () => showScreen("game"));
-    quitButton.addEventListener("click", quitToMenu);
+    quitButton.addEventListener("click", openSettingsFromGame);
 
     npcCountInput.addEventListener("change", readSettingsForm);
     roomSizeInput.addEventListener("change", readSettingsForm);
