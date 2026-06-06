@@ -252,17 +252,19 @@ The player should need to reason about the multiplication equation to know which
 
 ## NPC Movement
 
-NPCs usually move randomly.
+NPCs usually move by wandering toward random locations.
 
 Default NPC behavior:
 
-- Wander around the room.
-- Occasionally choose a new random direction.
+- Choose a random target location inside the room.
+- Move toward that target location.
+- Choose a new target location after reaching the current one.
+- If the NPC stops making progress toward the target, treat it as stuck and choose a new target location.
 - Avoid leaving the room bounds.
 - Move slower than or similar to the player.
 - Use inertia so movement eases toward target velocity instead of snapping instantly.
 
-Each NPC has an awareness radius derived from the configured awareness amount. When another character enters this radius, the NPC stops pure random wandering and reacts to that character.
+Each NPC has an awareness radius derived from the configured awareness amount. When another character enters this radius, the NPC stops waypoint wandering and reacts to that character.
 
 The reaction is either:
 
@@ -329,7 +331,31 @@ function findAwarenessTarget(npc, characters) {
 }
 ```
 
-If no target is inside the radius, the NPC wanders randomly.
+If no target is inside the radius, the NPC resumes waypoint wandering.
+
+Recommended waypoint behavior:
+
+```js
+function updateNpcWaypoint(npc, dt) {
+  if (!npc.waypoint) {
+    npc.waypoint = randomPointInsideRoom();
+  }
+
+  const distance = distanceBetween(npc, npc.waypoint);
+
+  if (distance < arrivalDistance) {
+    npc.waypoint = randomPointInsideRoom();
+    return;
+  }
+
+  if (npcHasStoppedMakingProgress(npc, distance, dt)) {
+    npc.waypoint = randomPointInsideRoom();
+    return;
+  }
+
+  npc.velocityTarget = directionTo(npc.waypoint) * npc.speed;
+}
+```
 
 ## Square Wave Personality
 
@@ -620,7 +646,8 @@ const game = {
       awarenessRadius: 7.1,
       phase: 0.5,
       wavelength: 4,
-      wanderTimer: 0,
+      waypoint: { x: 6, y: 3 },
+      stuckTimer: 0,
       swapCooldown: 0
     }
   ],
@@ -694,7 +721,7 @@ Recommended implementation order:
 11. Add win and wrong-number exit checks.
 12. Add scoring when a room is solved.
 13. Add automatic progression to the next level.
-14. Add NPC random wandering.
+14. Add NPC waypoint wandering.
 15. Add NPC awareness radius, using level-derived awareness amount.
 16. Add closest-character focus inside the awareness radius.
 17. Add square-wave attraction and repulsion.

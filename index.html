@@ -909,8 +909,10 @@
         phase: type === "npc" ? randomRange(0, wavelength) : 0,
         stateDuration,
         wavelength,
-        wanderTimer: 0,
-        wanderAngle: randomRange(0, Math.PI * 2),
+        waypoint: type === "npc" ? randomWaypoint() : null,
+        waypointPause: 0,
+        stuckTimer: 0,
+        lastProgressDistance: Infinity,
         spriteIndex: index
       };
     }
@@ -927,6 +929,13 @@
       return {
         x: 2 + (index % 4) * 1.4,
         y: 2 + Math.floor(index / 4) * 1.2
+      };
+    }
+
+    function randomWaypoint() {
+      return {
+        x: randomRange(0.9, ROOM.width - 0.9),
+        y: randomRange(0.9, ROOM.height - 0.9)
       };
     }
 
@@ -1048,17 +1057,58 @@
         const sign = mode === "attract" ? 1 : -1;
         npc.targetVx = dir.x * npc.speed * sign;
         npc.targetVy = dir.y * npc.speed * sign;
+        npc.stuckTimer = 0;
+        npc.lastProgressDistance = Infinity;
       } else {
-        npc.wanderTimer -= dt;
-        if (npc.wanderTimer <= 0) {
-          npc.wanderTimer = randomRange(0.8, 2.4);
-          npc.wanderAngle += randomRange(-0.9, 0.9);
-        }
-        npc.targetVx = Math.cos(npc.wanderAngle) * npc.speed * 0.72;
-        npc.targetVy = Math.sin(npc.wanderAngle) * npc.speed * 0.72;
+        updateNpcWaypoint(npc, dt);
       }
 
       moveCharacter(npc, dt);
+    }
+
+    function updateNpcWaypoint(npc, dt) {
+      if (!npc.waypoint) npc.waypoint = randomWaypoint();
+
+      if (npc.waypointPause > 0) {
+        npc.waypointPause -= dt;
+        npc.targetVx = 0;
+        npc.targetVy = 0;
+        if (npc.waypointPause <= 0) {
+          npc.waypoint = randomWaypoint();
+          npc.lastProgressDistance = Infinity;
+          npc.stuckTimer = 0;
+        }
+        return;
+      }
+
+      const dx = npc.waypoint.x - npc.x;
+      const dy = npc.waypoint.y - npc.y;
+      const distanceToWaypoint = Math.hypot(dx, dy);
+
+      if (distanceToWaypoint < 0.35) {
+        npc.waypointPause = randomRange(0.25, 0.7);
+        npc.targetVx = 0;
+        npc.targetVy = 0;
+        return;
+      }
+
+      if (distanceToWaypoint < npc.lastProgressDistance - 0.015) {
+        npc.lastProgressDistance = distanceToWaypoint;
+        npc.stuckTimer = 0;
+      } else {
+        npc.stuckTimer += dt;
+      }
+
+      if (npc.stuckTimer > 1.1 || Math.hypot(npc.vx, npc.vy) < 0.08 && Math.hypot(npc.targetVx, npc.targetVy) > 0.2) {
+        npc.waypoint = randomWaypoint();
+        npc.lastProgressDistance = Infinity;
+        npc.stuckTimer = 0;
+        return;
+      }
+
+      const dir = normalize(dx, dy);
+      npc.targetVx = dir.x * npc.speed * 0.75;
+      npc.targetVy = dir.y * npc.speed * 0.75;
     }
 
     function moveCharacter(character, dt) {
@@ -1072,13 +1122,21 @@
         character.x = clamp(character.x, 0.45, ROOM.width - 0.45);
         character.vx *= -0.4;
         character.targetVx *= -0.4;
-        character.wanderAngle = Math.PI - character.wanderAngle;
+        if (character.type === "npc") {
+          character.waypoint = randomWaypoint();
+          character.lastProgressDistance = Infinity;
+          character.stuckTimer = 0;
+        }
       }
       if (character.y < 0.45 || character.y > ROOM.height - 0.45) {
         character.y = clamp(character.y, 0.45, ROOM.height - 0.45);
         character.vy *= -0.4;
         character.targetVy *= -0.4;
-        character.wanderAngle = -character.wanderAngle;
+        if (character.type === "npc") {
+          character.waypoint = randomWaypoint();
+          character.lastProgressDistance = Infinity;
+          character.stuckTimer = 0;
+        }
       }
     }
 
