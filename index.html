@@ -380,6 +380,12 @@
       display: block;
     }
 
+    #gameScreen,
+    #gameCanvas {
+      touch-action: none;
+      user-select: none;
+    }
+
     #gameCanvas {
       display: block;
       width: 100vw;
@@ -571,7 +577,7 @@
         <div class="setting-card">
           <label for="roomSizeInput">Room size</label>
           <p class="hint">Number of tiles per side. 10 means a 10 x 10 room.</p>
-          <input id="roomSizeInput" type="number" min="6" max="18" step="1">
+          <input id="roomSizeInput" type="number" min="6" max="20" step="1">
         </div>
 
         <div class="setting-card">
@@ -700,7 +706,7 @@
       playerNpcSpeedRatio: 1.1,
       squareStateMinSeconds: 8,
       squareStateMaxSeconds: 23,
-      showAwareness: true,
+      showAwareness: false,
       axisMovement: false,
       music: false,
       soundEffects: true
@@ -770,6 +776,14 @@
     const toast = document.getElementById("toast");
 
     const keys = new Set();
+    const touchControl = {
+      active: false,
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      currentX: 0,
+      currentY: 0
+    };
     const images = {
       player: null,
       npcs: [],
@@ -866,7 +880,7 @@
           npcCount: clamp(Number(stored.npcCount) || DEFAULT_SETTINGS.npcCount, 1, 14),
           allowedBValues: allowedBValues.length ? allowedBValues : [...DEFAULT_SETTINGS.allowedBValues],
           awarenessAmount: clamp(Number(stored.awarenessAmount) || 0, 0, 1),
-          roomSize: clamp(Math.floor(Number(stored.roomSize) || DEFAULT_SETTINGS.roomSize), 6, 18),
+          roomSize: clamp(Math.floor(Number(stored.roomSize) || DEFAULT_SETTINGS.roomSize), 6, 20),
           wallCount: clamp(Math.floor(Number.isFinite(Number(stored.wallCount)) ? Number(stored.wallCount) : DEFAULT_SETTINGS.wallCount), 0, 12),
           speedMultiplier: clamp(Number(stored.speedMultiplier) || DEFAULT_SETTINGS.speedMultiplier, 0.75, 1.75),
           playerNpcSpeedRatio: clamp(Number(stored.playerNpcSpeedRatio) || DEFAULT_SETTINGS.playerNpcSpeedRatio, 0.5, 1.5),
@@ -883,7 +897,7 @@
     }
 
     function applyRoomSize() {
-      const size = clamp(Math.floor(Number(game.settings.roomSize) || DEFAULT_SETTINGS.roomSize), 6, 18);
+      const size = clamp(Math.floor(Number(game.settings.roomSize) || DEFAULT_SETTINGS.roomSize), 6, 20);
       game.settings.roomSize = size;
       ROOM.width = size;
       ROOM.height = size;
@@ -966,6 +980,10 @@
         element.classList.toggle("active", screenName === name);
       }
       game.running = name === "game";
+      if (name !== "game") {
+        touchControl.active = false;
+        touchControl.pointerId = null;
+      }
       if (name === "splash") renderLeaderboard();
       if (name === "settings") syncSettingsForm();
       if (name === "game") resizeCanvas();
@@ -999,7 +1017,7 @@
       const squareStateRange = normalizeSquareStateRange(squareStateMinInput.value, squareStateMaxInput.value);
       game.settings = {
         npcCount: clamp(Math.floor(Number(npcCountInput.value) || DEFAULT_SETTINGS.npcCount), 1, 14),
-        roomSize: clamp(Math.floor(Number(roomSizeInput.value) || DEFAULT_SETTINGS.roomSize), 6, 18),
+        roomSize: clamp(Math.floor(Number(roomSizeInput.value) || DEFAULT_SETTINGS.roomSize), 6, 20),
         wallCount: clamp(Math.floor(Number(wallCountInput.value) || 0), 0, 12),
         allowedBValues: selected.length ? selected : [...DEFAULT_SETTINGS.allowedBValues],
         awarenessAmount: clamp(Number(awarenessInput.value), 0, 1),
@@ -1237,10 +1255,26 @@
       return rangesOverlap(a.y, a.y + a.length, b.y, b.y + b.length, clearance);
     }
 
+    function wallSegmentDistance(a, b) {
+      const [aStart, aEnd] = wallEndpoints(a);
+      const [bStart, bEnd] = wallEndpoints(b);
+      return Math.min(
+        pointToSegmentDistance(aStart, bStart, bEnd),
+        pointToSegmentDistance(aEnd, bStart, bEnd),
+        pointToSegmentDistance(bStart, aStart, aEnd),
+        pointToSegmentDistance(bEnd, aStart, aEnd)
+      );
+    }
+
+    function wallsTooClose(a, b) {
+      const minimumTileGap = 2.5;
+      return wallsOverlap(a, b) || wallSegmentDistance(a, b) < minimumTileGap;
+    }
+
     function generateWalls() {
       const walls = [];
       const requested = clamp(Math.floor(Number(game.settings.wallCount) || 0), 0, 12);
-      const attemptsLimit = Math.max(80, requested * 90);
+      const attemptsLimit = Math.max(220, requested * 220);
       for (let attempts = 0; walls.length < requested && attempts < attemptsLimit; attempts += 1) {
         const axis = Math.random() < 0.5 ? "x" : "y";
         const length = Math.random() < 0.5 ? 2 : 4;
@@ -1252,8 +1286,8 @@
 
         const tooCloseToEntrance = isPointNearWall(PLAYER_START, wall, 1.3);
         const tooCloseToExit = isPointNearWall(EXIT, wall, 1.4);
-        const overlapsExisting = walls.some((existing) => wallsOverlap(existing, wall));
-        if (!tooCloseToEntrance && !tooCloseToExit && !overlapsExisting) walls.push(wall);
+        const tooCloseToExistingWall = walls.some((existing) => wallsTooClose(existing, wall));
+        if (!tooCloseToEntrance && !tooCloseToExit && !tooCloseToExistingWall) walls.push(wall);
       }
       return walls;
     }
@@ -1309,6 +1343,7 @@
         game.npcs.push(npc);
       }
       updateHud();
+      restartMusicForLevel();
     }
 
     function calculateRoomScore() {
@@ -1343,9 +1378,50 @@
     const audio = {
       context: null,
       musicGain: null,
+      musicFilter: null,
       musicTimer: 0,
-      musicStep: 0
+      musicStep: 0,
+      musicProfile: null
     };
+
+    const MUSIC_PROFILES = [
+      {
+        beatMs: 430,
+        filter: 1350,
+        gain: 0.68,
+        melody: [329.63, 392.0, 440.0, 523.25, 493.88, 392.0, 349.23, 392.0, 329.63, 392.0, 493.88, 587.33, 523.25, 440.0, 392.0, 349.23],
+        bass: [164.81, 196.0, 146.83, 174.61],
+        harmony: [659.25, 783.99, 587.33, 698.46],
+        wave: "triangle"
+      },
+      {
+        beatMs: 380,
+        filter: 1520,
+        gain: 0.62,
+        melody: [392.0, 493.88, 587.33, 659.25, 587.33, 523.25, 493.88, 440.0, 392.0, 440.0, 493.88, 523.25, 659.25, 587.33, 493.88, 392.0],
+        bass: [196.0, 164.81, 220.0, 146.83],
+        harmony: [783.99, 987.77, 880.0, 659.25],
+        wave: "sine"
+      },
+      {
+        beatMs: 470,
+        filter: 1180,
+        gain: 0.72,
+        melody: [293.66, 349.23, 392.0, 440.0, 392.0, 349.23, 329.63, 392.0, 440.0, 523.25, 493.88, 440.0, 392.0, 329.63, 349.23, 293.66],
+        bass: [146.83, 174.61, 130.81, 196.0],
+        harmony: [587.33, 698.46, 659.25, 783.99],
+        wave: "triangle"
+      },
+      {
+        beatMs: 340,
+        filter: 1700,
+        gain: 0.58,
+        melody: [440.0, 523.25, 659.25, 587.33, 523.25, 659.25, 783.99, 659.25, 587.33, 493.88, 523.25, 440.0, 392.0, 493.88, 587.33, 523.25],
+        bass: [220.0, 196.0, 246.94, 164.81],
+        harmony: [880.0, 1046.5, 987.77, 783.99],
+        wave: "triangle"
+      }
+    ];
 
     function ensureAudio() {
       const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -1391,40 +1467,118 @@
       playTone({ frequency: 740, duration: 0.16, type: "sine", volume: 0.035, delay: 0.07, endFrequency: 420 });
     }
 
-    function playMusicNote(frequency, delay, duration = 0.34) {
+    function playMusicNote({ frequency, delay = 0, duration = 0.34, type = "triangle", volume = 0.035, pan = 0, endFrequency = null }) {
       const context = ensureAudio();
       if (!context || !audio.musicGain) return;
       const start = context.currentTime + delay;
       const oscillator = context.createOscillator();
       const gain = context.createGain();
-      oscillator.type = "triangle";
+      const panner = context.createStereoPanner ? context.createStereoPanner() : null;
+      oscillator.type = type;
       oscillator.frequency.setValueAtTime(frequency, start);
+      if (endFrequency) oscillator.frequency.exponentialRampToValueAtTime(endFrequency, start + duration);
       gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.035, start + 0.03);
+      gain.gain.exponentialRampToValueAtTime(volume, start + 0.035);
+      gain.gain.setValueAtTime(volume * 0.72, start + Math.max(0.05, duration * 0.58));
       gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-      oscillator.connect(gain).connect(audio.musicGain);
+      if (panner) {
+        panner.pan.setValueAtTime(pan, start);
+        oscillator.connect(gain).connect(panner).connect(audio.musicFilter || audio.musicGain);
+      } else {
+        oscillator.connect(gain).connect(audio.musicFilter || audio.musicGain);
+      }
       oscillator.start(start);
       oscillator.stop(start + duration + 0.03);
     }
 
+    function musicProfileForLevel(level) {
+      const levelIndex = Math.max(1, level) - 1;
+      const base = MUSIC_PROFILES[levelIndex % MUSIC_PROFILES.length];
+      const semitoneOffsets = [0, 2, 4, 5, 7, 9, 11, 12];
+      const transpose = 2 ** (semitoneOffsets[levelIndex % semitoneOffsets.length] / 12);
+      const tempoShift = Math.floor(levelIndex / MUSIC_PROFILES.length) * 12;
+      return {
+        ...base,
+        beatMs: Math.max(300, base.beatMs - tempoShift),
+        filter: base.filter + (levelIndex % 3) * 90,
+        melody: base.melody.map((frequency) => frequency * transpose),
+        bass: base.bass.map((frequency) => frequency * transpose),
+        harmony: base.harmony.map((frequency) => frequency * transpose)
+      };
+    }
+
+    function configureMusicForLevel() {
+      audio.musicProfile = musicProfileForLevel(game.level);
+      if (audio.musicFilter) {
+        audio.musicFilter.frequency.setTargetAtTime(audio.musicProfile.filter, audio.context.currentTime, 0.08);
+      }
+      if (audio.musicGain) {
+        audio.musicGain.gain.setTargetAtTime(audio.musicProfile.gain, audio.context.currentTime, 0.08);
+      }
+    }
+
     function scheduleMusicBeat() {
       if (!audio.context || !audio.musicGain) return;
-      const pattern = [261.63, 329.63, 392.0, 523.25, 392.0, 329.63, 293.66, 392.0];
-      const bass = [130.81, 146.83, 164.81, 196.0];
-      playMusicNote(pattern[audio.musicStep % pattern.length], 0, 0.32);
-      if (audio.musicStep % 2 === 0) playMusicNote(bass[Math.floor(audio.musicStep / 2) % bass.length], 0.02, 0.46);
+      if (!audio.musicProfile) configureMusicForLevel();
+      const profile = audio.musicProfile;
+      const step = audio.musicStep % profile.melody.length;
+      const phrase = Math.floor(audio.musicStep / 4) % profile.bass.length;
+
+      playMusicNote({
+        frequency: profile.melody[step],
+        duration: step % 4 === 3 ? 0.58 : 0.38,
+        type: profile.wave,
+        volume: 0.03,
+        pan: step % 2 === 0 ? -0.2 : 0.2
+      });
+
+      if (step % 4 === 0) {
+        playMusicNote({
+          frequency: profile.bass[phrase],
+          delay: 0.01,
+          duration: 0.95,
+          type: "sine",
+          volume: 0.028,
+          pan: -0.08
+        });
+      }
+
+      if (step % 4 === 2) {
+        playMusicNote({
+          frequency: profile.harmony[phrase],
+          delay: 0.08,
+          duration: 0.46,
+          type: "sine",
+          volume: 0.013,
+          pan: 0.34
+        });
+      }
+
       audio.musicStep += 1;
+    }
+
+    function restartMusicForLevel() {
+      if (!audio.musicGain || !game.settings.music || game.screen !== "game") return;
+      if (audio.musicTimer) window.clearInterval(audio.musicTimer);
+      configureMusicForLevel();
+      audio.musicStep = 0;
+      scheduleMusicBeat();
+      audio.musicTimer = window.setInterval(scheduleMusicBeat, audio.musicProfile.beatMs);
     }
 
     function startBackgroundMusic() {
       const context = ensureAudio();
       if (!context || audio.musicGain) return;
       audio.musicGain = context.createGain();
-      audio.musicGain.gain.value = 0.55;
+      audio.musicFilter = context.createBiquadFilter();
+      audio.musicFilter.type = "lowpass";
+      audio.musicFilter.Q.value = 0.55;
+      audio.musicFilter.connect(audio.musicGain);
       audio.musicGain.connect(context.destination);
+      configureMusicForLevel();
       audio.musicStep = 0;
       scheduleMusicBeat();
-      audio.musicTimer = window.setInterval(scheduleMusicBeat, 520);
+      audio.musicTimer = window.setInterval(scheduleMusicBeat, audio.musicProfile.beatMs);
     }
 
     function stopBackgroundMusic() {
@@ -1434,6 +1588,11 @@
         audio.musicGain.disconnect();
         audio.musicGain = null;
       }
+      if (audio.musicFilter) {
+        audio.musicFilter.disconnect();
+        audio.musicFilter = null;
+      }
+      audio.musicProfile = null;
     }
 
     function syncMusic() {
@@ -1477,6 +1636,19 @@
       }
     }
 
+    function getTouchInputVector() {
+      if (!touchControl.active) return { x: 0, y: 0 };
+      const dx = touchControl.currentX - touchControl.startX;
+      const dy = touchControl.currentY - touchControl.startY;
+      const deadZone = 18;
+      const length = Math.hypot(dx, dy);
+      if (length < deadZone) return { x: 0, y: 0 };
+      return {
+        x: dx / length,
+        y: dy / length
+      };
+    }
+
     function updatePlayer(dt) {
       if (game.pendingTeleport) {
         game.player.targetVx = 0;
@@ -1491,6 +1663,11 @@
       if (keys.has("arrowright") || keys.has("d")) sx += 1;
       if (keys.has("arrowup") || keys.has("w")) sy -= 1;
       if (keys.has("arrowdown") || keys.has("s")) sy += 1;
+      if (sx === 0 && sy === 0) {
+        const touchVector = getTouchInputVector();
+        sx = touchVector.x;
+        sy = touchVector.y;
+      }
 
       const world = game.settings.axisMovement
         ? normalize(sx, sy)
@@ -1942,28 +2119,24 @@
     }
 
     function compareWallAndCharacter(wall, character) {
-      // Long wall sprites need screen-space ordering near their full visual segment.
-      // A single midpoint or endpoint depth makes the whole wall occlude from the wrong side.
       const [a, b] = wallEndpoints(wall);
-      const start = project(a.x, a.y);
-      const end = project(b.x, b.y);
-      const foot = project(character.x, character.y);
-      const dx = end.x - start.x;
-      const dy = end.y - start.y;
-      const lengthSq = dx * dx + dy * dy;
+      const tileDistanceToWall = pointToSegmentDistance(character, a, b);
 
-      if (lengthSq > 0.001) {
-        const t = clamp(((foot.x - start.x) * dx + (foot.y - start.y) * dy) / lengthSq, 0, 1);
-        const closest = {
-          x: start.x + dx * t,
-          y: start.y + dy * t
-        };
-        const distanceToSegment = Math.hypot(foot.x - closest.x, foot.y - closest.y);
-        const overlapDistance = Math.max(54, tileWidth() * 0.82);
-        if (distanceToSegment <= overlapDistance) {
-          const depthGap = foot.y - closest.y;
-          const depthEpsilon = Math.max(4, tileHeight() * 0.12);
-          if (Math.abs(depthGap) > depthEpsilon) return depthGap > 0 ? -1 : 1;
+      if (tileDistanceToWall <= 1.2) {
+        if (wall.axis === "x") {
+          const withinSpan = character.x >= wall.x - 0.55
+            && character.x <= wall.x + wall.length + 0.55;
+          if (withinSpan) {
+            const side = character.y - wall.y;
+            if (Math.abs(side) > 0.04) return side > 0 ? -1 : 1;
+          }
+        } else {
+          const withinSpan = character.y >= wall.y - 0.55
+            && character.y <= wall.y + wall.length + 0.55;
+          if (withinSpan) {
+            const side = character.x - wall.x;
+            if (Math.abs(side) > 0.04) return side > 0 ? -1 : 1;
+          }
         }
       }
 
@@ -2429,6 +2602,42 @@
 
     window.addEventListener("keyup", (event) => {
       keys.delete(event.key.toLowerCase());
+    });
+
+    canvas.addEventListener("pointerdown", (event) => {
+      if (game.screen !== "game") return;
+      touchControl.active = true;
+      touchControl.pointerId = event.pointerId;
+      touchControl.startX = event.clientX;
+      touchControl.startY = event.clientY;
+      touchControl.currentX = event.clientX;
+      touchControl.currentY = event.clientY;
+      canvas.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+
+    canvas.addEventListener("pointermove", (event) => {
+      if (!touchControl.active || touchControl.pointerId !== event.pointerId) return;
+      touchControl.currentX = event.clientX;
+      touchControl.currentY = event.clientY;
+      event.preventDefault();
+    });
+
+    function stopTouchControl(event) {
+      if (!touchControl.active || touchControl.pointerId !== event.pointerId) return;
+      if (canvas.hasPointerCapture(event.pointerId)) {
+        canvas.releasePointerCapture(event.pointerId);
+      }
+      touchControl.active = false;
+      touchControl.pointerId = null;
+      event.preventDefault();
+    }
+
+    canvas.addEventListener("pointerup", stopTouchControl);
+    canvas.addEventListener("pointercancel", stopTouchControl);
+    canvas.addEventListener("lostpointercapture", () => {
+      touchControl.active = false;
+      touchControl.pointerId = null;
     });
 
     window.addEventListener("beforeunload", () => {
