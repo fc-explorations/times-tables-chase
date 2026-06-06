@@ -202,7 +202,8 @@ Player style:
 - Slightly brighter outline or rim.
 - Confident forward-facing pose.
 - No built-in number placard, sign, or baked-in number.
-- Optional small backpack, cap, or sash to make the player distinct.
+- Optional small backpack or sash to make the player distinct.
+- Avoid forehead ovals, forehead badges, caps, antennae, or head markings that could be confused with carried numbers.
 
 The player should look active and controllable.
 
@@ -228,8 +229,10 @@ Each NPC can have a small visual variation:
 
 - Different color.
 - Different head shape.
-- Small cap, antenna-like knob, or scarf.
+- Small scarf or body accent.
 - Different small accessory.
+
+Avoid forehead ovals, forehead badges, caps, antennae, or head markings. The only gameplay number marker should be the dynamic floating badge above the character.
 
 Avoid making NPCs too detailed, because several will be on screen at once.
 
