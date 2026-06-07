@@ -576,6 +576,39 @@
       font-weight: 900;
     }
 
+    .character-feature {
+      min-height: 280px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at center, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.96) 34%, rgba(226, 246, 249, 0.96) 100%),
+        linear-gradient(180deg, #fbfffd, #e8f6f4);
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      margin-top: 18px;
+    }
+
+    .character-feature > div {
+      display: grid;
+      justify-items: center;
+      width: 100%;
+    }
+
+    .character-feature img {
+      width: min(330px, 72%);
+      aspect-ratio: 1;
+      object-fit: contain;
+    }
+
+    .character-feature-name {
+      margin-top: -4px;
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 950;
+      text-align: center;
+    }
+
     .character-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -590,6 +623,8 @@
       border-radius: 8px;
       padding: 14px;
       background: #fff;
+      justify-items: center;
+      text-align: center;
     }
 
     .character-card.selected {
@@ -598,15 +633,8 @@
     }
 
     .character-preview {
-      display: grid;
-      place-items: end center;
-      min-height: 160px;
-      background: transparent;
-    }
-
-    .character-preview img {
-      max-width: 100%;
-      max-height: 160px;
+      width: 92px;
+      height: 92px;
       object-fit: contain;
     }
 
@@ -817,6 +845,13 @@
         <div id="characterShopScore" class="shop-score">Score 0</div>
       </div>
 
+      <div class="character-feature" aria-live="polite">
+        <div>
+          <img id="characterFeatureImage" src="assets/characters/player_cyan_idle.png" alt="Classic">
+          <div id="characterFeatureName" class="character-feature-name">Classic</div>
+        </div>
+      </div>
+
       <div id="characterShopGrid" class="character-grid"></div>
 
       <div class="button-row">
@@ -963,6 +998,8 @@
     const equationHud = document.getElementById("equationHud");
     const characterShopScore = document.getElementById("characterShopScore");
     const characterShopGrid = document.getElementById("characterShopGrid");
+    const characterFeatureImage = document.getElementById("characterFeatureImage");
+    const characterFeatureName = document.getElementById("characterFeatureName");
     const toast = document.getElementById("toast");
 
     const keys = new Set();
@@ -1160,9 +1197,19 @@
       return images.players[option.id] || images.player;
     }
 
+    function showCharacterPreview(id) {
+      const option = CHARACTER_OPTIONS.find((character) => character.id === id) ||
+        selectedCharacterOption() ||
+        CHARACTER_OPTIONS[0];
+      characterFeatureImage.src = option.src;
+      characterFeatureImage.alt = option.name;
+      characterFeatureName.textContent = option.name;
+    }
+
     function renderCharacterShop() {
       characterShopScore.textContent = `Score ${game.score}`;
       characterShopGrid.innerHTML = "";
+      showCharacterPreview(game.characterState.selected);
 
       for (const option of CHARACTER_OPTIONS) {
         const owned = game.characterState.owned.includes(option.id);
@@ -1170,15 +1217,16 @@
         const affordable = game.score >= option.cost;
         const card = document.createElement("div");
         card.className = `character-card${selected ? " selected" : ""}`;
+        card.dataset.characterId = option.id;
         card.innerHTML = `
-          <div class="character-preview">
-            <img src="${option.src}" alt="${option.name}">
-          </div>
+          <img class="character-preview" src="${option.src}" alt="${option.name}">
           <div class="character-meta">
             <span>${option.name}</span>
-            <span class="character-cost">${option.cost ? `${option.cost} pts` : "Free"}</span>
           </div>
+          <div class="character-cost">${option.cost ? `${option.cost} pts` : "Free"}</div>
         `;
+        card.addEventListener("mouseover", () => showCharacterPreview(option.id));
+        card.addEventListener("focusin", () => showCharacterPreview(option.id));
 
         const button = document.createElement("button");
         button.type = "button";
