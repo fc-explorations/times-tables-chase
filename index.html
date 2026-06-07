@@ -892,6 +892,7 @@
     const PLAYER_START = { x: 0.85, y: 9.15 };
     const EXIT = { x: 8.3, y: 0.9, radius: 0.65 };
     const BASE_CHARACTER_SPEED = 2.8;
+    const WALL_CHARACTER_CLEARANCE = 1.05;
     const SPRITE_PATHS = {
       player: "assets/characters/player_cyan_idle.png",
       npcs: [
@@ -1543,7 +1544,7 @@
       for (let attempts = 0; attempts < 100; attempts += 1) {
         const x = randomRange(margin, ROOM.width - margin);
         const y = randomRange(margin, ROOM.height - margin);
-        if (distance({ x, y }, PLAYER_START) > 2 && distance({ x, y }, EXIT) > 2 && !isPointBlockedByWall({ x, y }, 0.75)) {
+        if (distance({ x, y }, PLAYER_START) > 2 && distance({ x, y }, EXIT) > 2 && !isPointBlockedByWall({ x, y })) {
           return { x, y };
         }
       }
@@ -1559,7 +1560,7 @@
           x: randomRange(0.9, ROOM.width - 0.9),
           y: randomRange(0.9, ROOM.height - 0.9)
         };
-        if (!isPointBlockedByWall(point, 0.7) && !isPointBlockedByExit(point, 1.15)) return point;
+        if (!isPointBlockedByWall(point) && !isPointBlockedByExit(point, 1.15)) return point;
       }
       return {
         x: randomRange(0.9, ROOM.width - 0.9),
@@ -1651,7 +1652,7 @@
       return walls;
     }
 
-    function isPointBlockedByWall(point, clearance = 0.52) {
+    function isPointBlockedByWall(point, clearance = WALL_CHARACTER_CLEARANCE) {
       return game.walls.some((wall) => isPointNearWall(point, wall, clearance));
     }
 
@@ -2141,7 +2142,7 @@
     }
 
     function resolveWallCollision(character, oldX, oldY) {
-      const radius = character.radius + 0.08;
+      const radius = WALL_CHARACTER_CLEARANCE;
       for (const wall of game.walls) {
         if (wall.axis === "x") {
           const withinSpan = character.x >= wall.x - radius && character.x <= wall.x + wall.length + radius;
