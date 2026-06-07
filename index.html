@@ -420,9 +420,9 @@
       width: min(100vw, calc(100vh * 1672 / 941));
       aspect-ratio: 1672 / 941;
       transform: translateX(-50%);
-      font-size: clamp(9px, min(1vw, 1.78vh), 16px);
+      font-size: clamp(5px, min(1vw, 1.78vh), 16px);
       container-type: size;
-      font-size: clamp(9px, 1.15cqw, 16px);
+      font-size: clamp(5px, 1.15cqw, 16px);
       pointer-events: none;
     }
 
@@ -476,10 +476,10 @@
     .hud-board-card {
       align-self: center;
       justify-self: center;
-      width: min(82%, 23.5em);
+      width: min(88%, 23.5em);
       border: 1px solid rgba(29, 104, 111, 0.18);
       border-radius: 0.95em;
-      padding: 1.02em 1.35em 1.08em;
+      padding: 0.9em 1.1em 0.96em;
       background:
         radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.96), transparent 58%),
         linear-gradient(180deg, rgba(255, 254, 239, 0.98), rgba(247, 251, 238, 0.92));
@@ -494,7 +494,7 @@
     .hud-equation {
       color: #16636d;
       font-size: 3em;
-      font-size: clamp(2.15em, 5.8cqw, 3.35em);
+      font-size: clamp(1.2em, 5.8cqw, 3.35em);
       line-height: 1;
       font-weight: 1000;
       letter-spacing: 0;
@@ -801,9 +801,8 @@
       </div>
 
       <div class="button-row">
-        <button id="settingsStartButton" type="button">Start</button>
-        <button id="settingsResetButton" class="secondary" type="button">Reset</button>
-        <button id="settingsBackButton" class="secondary" type="button">Back</button>
+        <button id="settingsStartButton" type="button">Continue</button>
+        <button id="settingsBackButton" class="secondary" type="button">Restart</button>
       </div>
     </div>
   </section>
@@ -856,15 +855,15 @@
     };
 
     const DEFAULT_SETTINGS = {
-      npcCount: 6,
+      npcCount: 4,
       allowedBValues: [2, 3, 4, 5, 6, 7, 8, 9],
       awarenessAmount: 0.15,
-      roomSize: 16,
-      wallCount: 8,
-      speedMultiplier: 0.85,
-      playerNpcSpeedRatio: 1.1,
-      squareStateMinSeconds: 8,
-      squareStateMaxSeconds: 23,
+      roomSize: 15,
+      wallCount: 7,
+      speedMultiplier: 1,
+      playerNpcSpeedRatio: 1.2,
+      squareStateMinSeconds: 6,
+      squareStateMaxSeconds: 10,
       showAwareness: false,
       axisMovement: false,
       music: true,
@@ -937,7 +936,6 @@
     const startButton = document.getElementById("startButton");
     const settingsButton = document.getElementById("settingsButton");
     const settingsStartButton = document.getElementById("settingsStartButton");
-    const settingsResetButton = document.getElementById("settingsResetButton");
     const settingsBackButton = document.getElementById("settingsBackButton");
     const charactersButton = document.getElementById("charactersButton");
     const charactersBackButton = document.getElementById("charactersBackButton");
@@ -1001,6 +999,10 @@
       equation: null,
       currentNpcCount: 0,
       currentAwarenessAmount: 0,
+      generatedRoomSize: 0,
+      generatedWallCount: 0,
+      generatedNpcCount: 0,
+      generatedAllowedBValues: [],
       player: null,
       npcs: [],
       walls: [],
@@ -1339,29 +1341,65 @@
       syncSettingsForm();
     }
 
-    function resetAllSettingsAndProgress() {
+    function sameNumberList(a, b) {
+      return a.length === b.length && a.every((value, index) => value === b[index]);
+    }
+
+    function refreshActiveLevelFromSettings() {
+      game.currentNpcCount = getLevelNpcCount(game.settings, game.level);
+      game.currentAwarenessAmount = getLevelAwarenessAmount(game.settings, game.level);
+      const needsRegeneration =
+        game.generatedRoomSize !== game.settings.roomSize
+        || game.generatedWallCount !== game.settings.wallCount
+        || game.generatedNpcCount !== game.currentNpcCount
+        || !sameNumberList(game.generatedAllowedBValues, game.settings.allowedBValues);
+
+      if (needsRegeneration) {
+        game.levelTransitionTimer = 0;
+        game.pendingTeleport = null;
+        game.swapEffects = [];
+        game.correctExitEffects = [];
+        game.wrongExitEffects = [];
+        generateLevel();
+        return;
+      }
+
+      const awarenessRadius = getAwarenessRadius(game.currentAwarenessAmount, ROOM);
+      if (game.player) {
+        game.player.speed = BASE_CHARACTER_SPEED * game.settings.speedMultiplier * game.settings.playerNpcSpeedRatio;
+      }
+      for (const npc of game.npcs) {
+        npc.speed = BASE_CHARACTER_SPEED * game.settings.speedMultiplier;
+        npc.awarenessRadius = awarenessRadius;
+        npc.stateDuration = clamp(npc.stateDuration, game.settings.squareStateMinSeconds, game.settings.squareStateMaxSeconds);
+        npc.wavelength = Math.max(10, npc.stateDuration * 2);
+      }
+    }
+
+    function restoreDefaultSettings() {
       game.settings = {
         ...DEFAULT_SETTINGS,
         allowedBValues: [...DEFAULT_SETTINGS.allowedBValues]
       };
       applyRoomSize();
       saveSettings();
+      syncSettingsForm();
+      syncMusic();
+    }
+
+    function restartFromSettings() {
+      restoreDefaultSettings();
 
       game.score = 0;
       game.level = 1;
       game.highestLevelReached = 1;
-      game.characterState = defaultCharacterState();
-      game.leaderboard = [];
-      localStorage.removeItem(STORAGE_KEYS.characters);
-      localStorage.removeItem(STORAGE_KEYS.leaderboard);
-
-      syncSettingsForm();
+      game.running = false;
+      game.levelTransitionTimer = 0;
+      game.pendingTeleport = null;
+      game.activeContacts.clear();
       levelHud.textContent = `Level ${game.level}`;
       scoreHud.textContent = `Score ${game.score}`;
-      if (game.equation) updateHud();
-      renderLeaderboard();
-      syncMusic();
-      showToast("Reset complete.", 1100);
+      showScreen("splash");
     }
 
     function loadImage(src) {
@@ -1685,6 +1723,10 @@
       game.activeContacts.clear();
       game.currentNpcCount = getLevelNpcCount(game.settings, game.level);
       game.currentAwarenessAmount = getLevelAwarenessAmount(game.settings, game.level);
+      game.generatedRoomSize = game.settings.roomSize;
+      game.generatedWallCount = game.settings.wallCount;
+      game.generatedNpcCount = game.currentNpcCount;
+      game.generatedAllowedBValues = [...game.settings.allowedBValues];
       game.walls = generateWalls();
       const awarenessRadius = getAwarenessRadius(game.currentAwarenessAmount, ROOM);
       const distractors = pickBalancedDistractorNumbers(game.currentNpcCount);
@@ -2972,19 +3014,28 @@
     }
 
     function openSettingsFromGame() {
-      maybeRecordScore();
       game.running = false;
       showScreen("settings");
     }
 
-    startButton.addEventListener("click", startRun);
-    settingsStartButton.addEventListener("click", startRun);
-    settingsButton.addEventListener("click", () => showScreen("settings"));
-    settingsResetButton.addEventListener("click", resetAllSettingsAndProgress);
-    settingsBackButton.addEventListener("click", () => {
+    function continueFromSettings() {
+      const wasInGame = Boolean(game.player);
       readSettingsForm();
-      showScreen("splash");
-    });
+      if (wasInGame) {
+        refreshActiveLevelFromSettings();
+        showScreen("game");
+        game.running = true;
+        game.lastTimestamp = performance.now();
+        updateHud();
+      } else {
+        startRun();
+      }
+    }
+
+    startButton.addEventListener("click", startRun);
+    settingsStartButton.addEventListener("click", continueFromSettings);
+    settingsButton.addEventListener("click", () => showScreen("settings"));
+    settingsBackButton.addEventListener("click", restartFromSettings);
     charactersButton.addEventListener("click", () => showScreen("characters"));
     charactersBackButton.addEventListener("click", () => showScreen("game"));
     quitButton.addEventListener("click", openSettingsFromGame);
