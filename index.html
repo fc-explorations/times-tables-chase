@@ -457,11 +457,11 @@
 
     .hud-badge {
       width: fit-content;
-      min-height: 1.55em;
-      border: 1px solid rgba(31, 99, 109, 0.12);
-      border-radius: 999px;
-      padding: 0.18em 0.62em 0.22em;
-      background: rgba(255, 248, 211, 0.52);
+      min-height: 0;
+      border: 0;
+      border-radius: 0;
+      padding: 0.18em 0;
+      background: transparent;
       color: #24555d;
       font-size: 0.82em;
       font-weight: 900;
@@ -477,16 +477,11 @@
       align-self: center;
       justify-self: center;
       width: min(88%, 23.5em);
-      border: 1px solid rgba(29, 104, 111, 0.18);
-      border-radius: 0.95em;
-      padding: 0.9em 1.1em 0.96em;
-      background:
-        radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.96), transparent 58%),
-        linear-gradient(180deg, rgba(255, 254, 239, 0.98), rgba(247, 251, 238, 0.92));
-      box-shadow:
-        inset 0 0 0 1px rgba(255, 255, 255, 0.72),
-        0 0.42em 1.05em rgba(36, 49, 58, 0.12),
-        0 0.15em 0 rgba(31, 99, 109, 0.08);
+      border: 0;
+      border-radius: 0;
+      padding: 0.25em 0;
+      background: transparent;
+      box-shadow: none;
       text-align: center;
       pointer-events: auto;
     }
@@ -522,25 +517,17 @@
       position: absolute;
       right: 0.76em;
       bottom: 0.58em;
-      display: grid;
-      place-items: center;
-      width: 1.9em;
-      height: 1.9em;
-      min-height: 0;
+      min-height: 1.9em;
       border: 1px solid rgba(31, 99, 109, 0.16);
       border-radius: 999px;
-      padding: 0;
+      padding: 0 0.72em;
       color: #31535c;
       background: rgba(239, 247, 244, 0.78);
       box-shadow: 0 0.12em 0 rgba(31, 99, 109, 0.1);
-      font-size: 0.96em;
+      font-size: 0.76em;
+      font-weight: 900;
       line-height: 1;
       pointer-events: auto;
-    }
-
-    .hud-menu-button .gear-icon {
-      display: block;
-      transform: translateY(-0.02em);
     }
 
     .hud-characters-button {
@@ -872,9 +859,7 @@
           <div id="equationHud" class="hud-equation">2 &times; 3 = <span class="missing-slot">?</span></div>
         </div>
         <button id="charactersButton" class="hud-characters-button" type="button" aria-label="Open characters">Characters</button>
-        <button id="quitButton" class="hud-menu-button" type="button" aria-label="Open settings">
-          <span class="gear-icon" aria-hidden="true">&#9881;</span>
-        </button>
+        <button id="quitButton" class="hud-menu-button" type="button" aria-label="Open settings">Setup</button>
       </div>
     </div>
     <div id="toast" class="toast"></div>
